@@ -361,10 +361,12 @@
       cards = Array.prototype.slice.call(track.children);
       wrap.style.height = (Math.max(1, items.length) * 62 + 20) + 'vh';
       paint();
+      window.__orbitItems = items;
+      document.dispatchEvent(new CustomEvent('orbit:rebuild', { detail: items }));
     }
 
     function paint() {
-      if (!cards.length) return;
+      if (!cards.length || document.documentElement.classList.contains('gl-orbit')) return;
       var g = geom();
       var p = g.total > 0 ? Math.max(0, Math.min(1, (window.scrollY - g.top) / g.total)) : 0;
       var focus = p * (cards.length - 1);
@@ -394,6 +396,7 @@
     }
 
     function onScroll() {
+      if (document.documentElement.classList.contains('gl-orbit')) return;
       if (raf) return;
       raf = requestAnimationFrame(function () { raf = null; paint(); });
     }

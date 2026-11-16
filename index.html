@@ -275,7 +275,9 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
     <div class="orbit-wrap" id="orbitWrap">
       <div class="orbit-stage" id="orbitStage">
         <div class="orbit-bg" aria-hidden="true"><i></i><i></i><i></i><i></i><canvas id="orbitParticles"></canvas></div>
+        <canvas class="orbit-gl" id="orbitGL" aria-hidden="true"></canvas>
         <div class="orbit-track" id="orbitTrack"></div>
+        <div class="gl-caption" id="glCaption" aria-hidden="true"><b>—</b><span>—</span></div>
 
         <aside class="orbit-panel">
           <p class="orbit-q">WHAT ARE YOU<br />LOOKING FOR?</p>
@@ -508,6 +510,7 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
 
 <script src="js/data.js"></script>
 <script src="js/main.js"></script>
+<script type="module" src="js/orbit3d.js"></script>
 </body>
 </html>
 
