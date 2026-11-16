@@ -272,47 +272,28 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
       <button class="sec-meta sec-meta-btn" type="button" data-open-first>// 全部展开 ▶</button>
     </header>
 
-    <div class="filters" id="filters" role="group" aria-label="作品分类筛选">
-      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">全部 <em>ALL</em><i>11</i></button>
-      <button class="filter" type="button" data-filter="interface" aria-pressed="false">界面交互 <em>UI</em><i>3</i></button>
-      <button class="filter" type="button" data-filter="dataviz" aria-pressed="false">数据可视化 <em>DATA</em><i>3</i></button>
-      <button class="filter" type="button" data-filter="visual" aria-pressed="false">视觉系统 <em>VISUAL</em><i>2</i></button>
-      <button class="filter" type="button" data-filter="space" aria-pressed="false">空间叙事 <em>SPACE</em><i>3</i></button>
-    </div>
+    <div class="orbit-wrap" id="orbitWrap">
+      <div class="orbit-stage" id="orbitStage">
+        <div class="orbit-bg" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="orbit-track" id="orbitTrack"></div>
 
-    <div class="view-bar">
-      <div class="view-switch" id="viewSwitch" role="group" aria-label="作品排版视图">
-        <button type="button" data-view="grid" class="is-on" aria-pressed="true">▦ 网格 GRID</button>
-        <button type="button" data-view="focus" aria-pressed="false">▣ 聚焦 FOCUS</button>
-        <button type="button" data-view="flow" aria-pressed="false">▤ 长廊 FLOW</button>
-        <button type="button" data-view="stair" aria-pressed="false">▥ 阶梯 STAIR</button>
-      </div>
-      <span class="view-hint" id="viewHint">悬停查看 · 点击进入档案</span>
-    </div>
+        <aside class="orbit-panel">
+          <p class="orbit-q">WHAT ARE YOU<br />LOOKING FOR?</p>
+          <ul class="orbit-nav" id="orbitNav">
+            <li><button type="button" data-filter="all" class="is-on">→ ALL / 全部</button></li>
+            <li><button type="button" data-filter="interface">→ INTERFACE / 界面</button></li>
+            <li><button type="button" data-filter="dataviz">→ DATA / 数据</button></li>
+            <li><button type="button" data-filter="visual">→ VISUAL / 视觉</button></li>
+            <li><button type="button" data-filter="space">→ SPACE / 空间</button></li>
+          </ul>
+          <span class="orbit-idx" id="orbitIndex">01 / 11</span>
+          <button type="button" class="orbit-enter" id="orbitEnter">SEARCH THE ARCHIVE ↗</button>
+        </aside>
 
-    <div class="focus-stage" id="focusStage" hidden>
-      <div class="focus-main">
-        <div class="focus-media" id="focusMedia"></div>
-        <div class="focus-info">
-          <span class="focus-no" id="focusNo">01</span>
-          <h3 id="focusTitle">—</h3>
-          <p class="focus-en" id="focusEn">—</p>
-          <p class="focus-desc" id="focusDesc">—</p>
-          <button class="btn btn-solid" type="button" id="focusOpen" data-open="01"><span>查看完整档案</span><i class="btn-ico">▶</i></button>
-        </div>
-      </div>
-      <div class="focus-rail" id="focusRail" role="group" aria-label="切换聚焦作品"></div>
-    </div>
-
-    <div class="stair-wrap" id="stairWrap" hidden>
-      <div class="stair-stage" id="stairStage">
-        <div class="stair-head"><span>STAIRCASE / 阶梯档案</span><span id="stairCount">STEP 01 / 11</span></div>
-        <div class="stair-scene" id="stairScene"></div>
-        <div class="stair-hint">滚动滚轮 · 作品沿阶梯旋转出现</div>
+        <div class="orbit-top"><a href="#works">ARCHIVE</a><a href="#link">ABOUT</a></div>
+        <div class="orbit-foot"><span id="orbitName">—</span><span>SCROLL / 滚轮切换</span></div>
       </div>
     </div>
-
-    <div class="wgrid" id="workGrid"></div>
 
     <div class="sec-foot reveal">
       <span>// 档案为节选，完整项目与过程稿可来信索取</span>

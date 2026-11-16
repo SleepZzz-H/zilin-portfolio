@@ -142,6 +142,7 @@
 
   function applyFilter(cat) {
     currentFilter = cat;
+    if (!grid) return;
     Array.prototype.forEach.call(grid.querySelectorAll('.wcard'), function (card) {
       var hide = cat !== 'all' && card.dataset.cat !== cat;
       card.classList.toggle('is-hidden', hide);
@@ -325,6 +326,110 @@
       dragging = false;
       setTimeout(function () { grid.classList.remove('is-dragging'); }, 0);
     });
+  })();
+
+  /* ---------- 三维悬浮档案轮播 ---------- */
+  (function orbit() {
+    var wrap = document.getElementById('orbitWrap');
+    var stage = document.getElementById('orbitStage');
+    var track = document.getElementById('orbitTrack');
+    var nav = document.getElementById('orbitNav');
+    var indexEl = document.getElementById('orbitIndex');
+    var nameEl = document.getElementById('orbitName');
+    var enter = document.getElementById('orbitEnter');
+    if (!wrap || !stage || !track) return;
+    var cards = [], items = [], active = 0, raf = null;
+
+    function geom() {
+      var top = wrap.getBoundingClientRect().top + window.scrollY;
+      var total = wrap.offsetHeight - stage.offsetHeight;
+      return { top: top, total: total };
+    }
+
+    function build() {
+      items = visibleWorks();
+      track.innerHTML = items.map(function (w) {
+        return '<button type="button" class="orbit-card" data-open="' + w.no + '">' +
+          '<img src="' + w.img + '" alt="' + w.title + '" loading="lazy" />' +
+          '<span class="oc-no">' + w.no + '</span>' +
+          '<span class="oc-mark" aria-hidden="true">HZ</span>' +
+          '<span class="oc-title">' + w.title + '</span>' +
+          '<span class="oc-en">' + w.en + '</span>' +
+          '<span class="oc-cat">' + w.catName + '</span>' +
+          '</button>';
+      }).join('');
+      cards = Array.prototype.slice.call(track.children);
+      wrap.style.height = (Math.max(1, items.length) * 62 + 20) + 'vh';
+      paint();
+    }
+
+    function paint() {
+      if (!cards.length) return;
+      var g = geom();
+      var p = g.total > 0 ? Math.max(0, Math.min(1, (window.scrollY - g.top) / g.total)) : 0;
+      var focus = p * (cards.length - 1);
+      var act = Math.round(focus);
+      cards.forEach(function (c, i) {
+        var d = i - focus;
+        var ad = Math.abs(d);
+        var X = d * 430;
+        var Z = -ad * 300;
+        var Y = ad * 26;
+        var rot = -d * 30;
+        var sc = Math.max(.55, 1 - ad * .2);
+        var op = Math.max(0, 1 - ad * .42);
+        c.style.transform = 'translate3d(calc(-50% + ' + X.toFixed(1) + 'px), calc(-50% + ' + Y.toFixed(1) +
+          'px), ' + Z.toFixed(1) + 'px) rotateY(' + rot.toFixed(1) + 'deg) scale(' + sc.toFixed(3) + ')';
+        c.style.opacity = op.toFixed(2);
+        c.style.zIndex = String(100 - Math.round(ad * 10));
+        c.style.pointerEvents = ad > 2.6 ? 'none' : 'auto';
+        c.classList.toggle('is-active', i === act);
+      });
+      active = act;
+      if (indexEl) indexEl.textContent = String(act + 1).padStart(2, '0') + ' / ' + String(cards.length).padStart(2, '0');
+      if (nameEl && items[act]) nameEl.textContent = items[act].title + ' — ' + items[act].en;
+    }
+
+    function onScroll() {
+      if (raf) return;
+      raf = requestAnimationFrame(function () { raf = null; paint(); });
+    }
+
+    if (nav) {
+      nav.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-filter]');
+        if (!b) return;
+        currentFilter = b.dataset.filter;
+        Array.prototype.forEach.call(nav.querySelectorAll('[data-filter]'), function (x) {
+          x.classList.toggle('is-on', x === b);
+        });
+        build();
+      });
+    }
+    if (enter) {
+      enter.addEventListener('click', function () {
+        if (!items[active]) return;
+        var hit = track.querySelector('[data-open="' + items[active].no + '"]');
+        if (hit) hit.click();
+      });
+    }
+    document.addEventListener('keydown', function (e) {
+      var keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+      if (!keys[e.key]) return;
+      var lb = document.getElementById('lightbox');
+      if (lb && lb.classList.contains('is-open')) return;
+      var md = document.getElementById('modal');
+      if (md && md.classList.contains('is-open')) return;
+      var g = geom();
+      var n = cards.length;
+      if (n < 2 || !g.total) return;
+      e.preventDefault();
+      var next = Math.max(0, Math.min(n - 1, active + keys[e.key]));
+      window.scrollTo({ top: g.top + (next / (n - 1)) * g.total, behavior: reduce ? 'auto' : 'smooth' });
+    });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', function () { paint(); });
+    build();
   })();
 
   /* ---------- 作品弹窗 ---------- */

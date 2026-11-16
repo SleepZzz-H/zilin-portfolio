@@ -947,6 +947,147 @@
   .stair-hint { font-size: 8px; }
 }
 
+/* ---------- 三维悬浮档案轮播 ---------- */
+.orbit-wrap { position: relative; margin-top: clamp(10px, 2vw, 20px); }
+.orbit-stage {
+  position: sticky; top: var(--bar);
+  height: calc(100svh - var(--bar)); min-height: 560px;
+  overflow: hidden; border: 1px solid var(--line);
+  background: #08090b; perspective: 1500px;
+}
+.orbit-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.orbit-bg::before {
+  content: ""; position: absolute; inset: -12%;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, .55) 1px, transparent 1.4px),
+    radial-gradient(circle, color-mix(in srgb, var(--signal) 60%, transparent) 1px, transparent 1.4px);
+  background-size: 150px 150px, 240px 240px;
+  background-position: 0 0, 70px 90px;
+  opacity: .5;
+  animation: orbStars 46s linear infinite;
+}
+@keyframes orbStars { to { transform: translate3d(-150px, -150px, 0); } }
+.orbit-bg i {
+  position: absolute; border-radius: 50%; filter: blur(70px);
+  background: radial-gradient(circle, color-mix(in srgb, var(--signal) 26%, transparent), transparent 68%);
+  opacity: .5; animation: orbDrift 18s ease-in-out infinite alternate;
+}
+.orbit-bg i:nth-child(1) { width: 62vw; height: 62vw; left: -14%; top: -22%; }
+.orbit-bg i:nth-child(2) { width: 42vw; height: 42vw; right: -8%; bottom: -14%; opacity: .3; animation-delay: -6s; }
+.orbit-bg i:nth-child(3) { width: 22vw; height: 22vw; left: 42%; top: 26%; opacity: .18; animation-delay: -11s; }
+.orbit-bg i:nth-child(4) {
+  width: 34vw; height: 34vw; right: 16%; top: -12%; opacity: .16;
+  background: radial-gradient(circle, rgba(255, 255, 255, .35), transparent 70%);
+  animation-delay: -3s;
+}
+@keyframes orbDrift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(4%, 3%, 0) scale(1.08); }
+}
+.orbit-track { position: absolute; inset: 0; transform-style: preserve-3d; }
+.orbit-card {
+  position: absolute; left: 50%; top: 49%;
+  width: min(600px, 50vw); aspect-ratio: 16 / 10;
+  padding: 0; border: 1px solid rgba(255, 255, 255, .2); border-radius: 12px;
+  overflow: hidden; background: #101210; cursor: pointer;
+  transform-origin: center center; will-change: transform, opacity;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .6);
+  text-align: left; color: #f1f0ea;
+}
+.orbit-card::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .08) 0%, rgba(0, 0, 0, .12) 42%, rgba(0, 0, 0, .82) 100%);
+}
+.orbit-card img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(.55) brightness(.7); transition: filter .6s var(--ease);
+}
+.orbit-card.is-active { border-color: color-mix(in srgb, var(--signal) 70%, transparent); }
+.orbit-card.is-active img { filter: grayscale(0) brightness(.92); }
+.oc-no, .oc-mark, .oc-title, .oc-en, .oc-cat { position: absolute; z-index: 2; }
+.oc-no {
+  left: 16px; top: 14px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .22em;
+  color: var(--signal);
+}
+.oc-mark {
+  right: 16px; top: 13px;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  color: var(--signal); border: 1px solid var(--signal); padding: 2px 6px;
+}
+.oc-title {
+  left: 18px; right: 18px; bottom: 40px;
+  font-family: var(--font-dis); font-weight: 900; text-transform: uppercase;
+  font-size: clamp(26px, 3.6vw, 52px); line-height: .94; letter-spacing: -.02em;
+  text-shadow: 0 8px 36px rgba(0, 0, 0, .75);
+}
+.oc-en {
+  left: 18px; bottom: 22px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .2em;
+  color: rgba(241, 240, 234, .72);
+}
+.oc-cat {
+  right: 18px; bottom: 21px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+  color: var(--signal);
+}
+.orbit-panel {
+  position: absolute; left: clamp(16px, 2.4vw, 30px); top: clamp(74px, 11vh, 128px);
+  z-index: 40; display: flex; flex-direction: column; gap: 14px; max-width: 210px;
+}
+.orbit-q {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .18em;
+  line-height: 1.9; color: rgba(241, 240, 234, .55);
+}
+.orbit-nav { display: flex; flex-direction: column; gap: 6px; }
+.orbit-nav button {
+  border: 0; background: none; padding: 2px 0; text-align: left; cursor: pointer;
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .12em;
+  color: rgba(241, 240, 234, .62);
+  transition: color var(--dur), transform var(--dur) var(--ease);
+}
+.orbit-nav button:hover { color: #f1f0ea; transform: translateX(4px); }
+.orbit-nav button.is-on { color: var(--signal); }
+.orbit-idx {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .2em;
+  color: rgba(241, 240, 234, .5); margin-top: 6px;
+}
+.orbit-enter {
+  align-self: flex-start; margin-top: 4px; padding: 8px 11px;
+  border: 1px solid rgba(241, 240, 234, .28); background: transparent;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+  color: rgba(241, 240, 234, .8); cursor: pointer;
+  transition: background var(--dur), color var(--dur), border-color var(--dur);
+}
+.orbit-enter:hover { background: var(--signal); color: var(--on-signal); border-color: var(--signal); }
+.orbit-top {
+  position: absolute; right: clamp(16px, 2.4vw, 30px); top: 18px; z-index: 40;
+  display: flex; gap: 16px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .18em;
+  color: rgba(241, 240, 234, .55);
+}
+.orbit-top a { color: inherit; }
+.orbit-top a:hover { color: var(--signal); }
+.orbit-foot {
+  position: absolute; left: clamp(16px, 2.4vw, 30px); right: clamp(16px, 2.4vw, 30px); bottom: 16px;
+  z-index: 40; display: flex; justify-content: space-between; gap: 12px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+  color: rgba(241, 240, 234, .45); pointer-events: none;
+}
+@media (max-width: 719px) {
+  .orbit-stage { min-height: 520px; }
+  .orbit-card { width: 82vw; top: 54%; }
+  .oc-title { font-size: 24px; bottom: 34px; }
+  .orbit-panel { top: 52px; left: 14px; right: 14px; max-width: none; gap: 8px; }
+  .orbit-q { font-size: 8px; letter-spacing: .14em; }
+  .orbit-nav { flex-direction: row; flex-wrap: wrap; gap: 4px 12px; }
+  .orbit-nav button { font-size: 8.5px; }
+  .orbit-idx { position: absolute; right: 0; top: 0; margin: 0; font-size: 9px; }
+  .orbit-enter { display: none; }
+  .orbit-top { display: none; }
+  .orbit-foot { font-size: 8px; }
+}
+
 .wgrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
