@@ -1,4 +1,8 @@
 ﻿import * as THREE from '../assets/vendor/three.module.js';
+import { EffectComposer } from '../assets/vendor/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from '../assets/vendor/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from '../assets/vendor/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from '../assets/vendor/addons/postprocessing/OutputPass.js';
 
 /* ============================================================
    三维档案场景：圆环螺旋排布 + 滚动相机 + 自定义卡片 shader
@@ -37,6 +41,24 @@
   var group = new THREE.Group();
   scene.add(group);
 
+  // Bloom：让信号色描边与粒子产生辉光
+  var composer = null;
+  var bloom = null;
+  try {
+    composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    bloom = new UnrealBloomPass(
+      new THREE.Vector2(stage.clientWidth, stage.clientHeight),
+      stage.clientWidth < 720 ? .42 : .62,
+      .55,
+      .58
+    );
+    composer.addPass(bloom);
+    composer.addPass(new OutputPass());
+  } catch (e) {
+    composer = null;
+  }
+
   var STEP = .58;
   var RADIUS = 4.9;
   var PW = 4.0;
@@ -60,19 +82,62 @@
   }
   var baseColor = readSignal();
 
-  // 背景粒子：参考站的空间尘埃
-  var pCount = 520;
+  // 可交互粒子：鼠标靠近时产生旋涡式排斥
+  var pCount = 1400;
   var pPos = new Float32Array(pCount * 3);
+  var pSeed = new Float32Array(pCount);
   for (var pi = 0; pi < pCount; pi++) {
-    pPos[pi * 3] = (Math.random() - .5) * 18;
-    pPos[pi * 3 + 1] = (Math.random() - .5) * 11;
-    pPos[pi * 3 + 2] = -8 + Math.random() * 10;
+    pPos[pi * 3] = (Math.random() - .5) * 20;
+    pPos[pi * 3 + 1] = (Math.random() - .5) * 12;
+    pPos[pi * 3 + 2] = -9 + Math.random() * 11;
+    pSeed[pi] = Math.random();
   }
   var pGeo = new THREE.BufferGeometry();
   pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  var pMat = new THREE.PointsMaterial({
-    color: baseColor.clone(), size: .045, transparent: true,
-    opacity: .62, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
+  pGeo.setAttribute('aSeed', new THREE.BufferAttribute(pSeed, 1));
+  var pMat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    uniforms: {
+      uTime: { value: 0 },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+      uColor: { value: baseColor.clone() },
+      uPixelRatio: { value: DPR }
+    },
+    vertexShader: [
+      'attribute float aSeed;',
+      'uniform float uTime;',
+      'uniform vec2 uMouse;',
+      'uniform float uPixelRatio;',
+      'varying float vA;',
+      'void main(){',
+      '  vec3 p = position;',
+      '  p.y += sin(uTime * .32 + aSeed * 6.283) * .16;',
+      '  p.x += cos(uTime * .26 + aSeed * 9.42) * .1;',
+      '  vec2 m = uMouse * vec2(16.0, 9.0);',
+      '  vec2 d = p.xy - m;',
+      '  float dist = length(d);',
+      '  float f = smoothstep(3.4, 0.0, dist);',
+      '  vec2 dir = d / max(dist, 0.001);',
+      '  p.xy += dir * f * 1.9;',
+      '  p.z += f * .8;',
+      '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
+      '  gl_PointSize = (2.0 + aSeed * 2.2) * uPixelRatio * (13.0 / -mv.z);',
+      '  gl_Position = projectionMatrix * mv;',
+      '  vA = .18 + f * .82;',
+      '}'
+    ].join('\n'),
+    fragmentShader: [
+      'uniform vec3 uColor;',
+      'varying float vA;',
+      'void main(){',
+      '  vec2 c = gl_PointCoord - .5;',
+      '  float d = length(c);',
+      '  float a = smoothstep(.5, 0.0, d) * vA;',
+      '  gl_FragColor = vec4(uColor, a);',
+      '}'
+    ].join('\n')
   });
   var dust = new THREE.Points(pGeo, pMat);
   scene.add(dust);
@@ -202,6 +267,9 @@
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    if (composer) composer.setSize(w, h);
+    if (bloom) bloom.setSize(w, h);
+    if (pMat) pMat.uniforms.uPixelRatio.value = DPR;
   }
 
   function progress() {
@@ -247,10 +315,10 @@
     camera.position.y += (-pointer.y * .38 - camera.position.y) * .05;
     camera.lookAt(0, 0, 0);
 
-    dust.rotation.y += .0007;
-    dust.rotation.x = pointer.y * .12;
-    dust.position.x += (pointer.x * .9 - dust.position.x) * .02;
-    pMat.color.copy(baseColor);
+    pMat.uniforms.uTime.value += .016;
+    pMat.uniforms.uMouse.value.set(pointer.x, pointer.y);
+    pMat.uniforms.uColor.value.copy(baseColor);
+    pMat.uniforms.uPixelRatio.value = DPR;
 
     hovered = hitTest();
 
@@ -275,7 +343,8 @@
     });
 
     updateHud(Math.round(focus));
-    renderer.render(scene, camera);
+    if (composer) composer.render();
+    else renderer.render(scene, camera);
     raf = requestAnimationFrame(tick);
     } catch (err) {
       window.__f3dErr = (err && (err.stack || err.message)) || 'unknown';
