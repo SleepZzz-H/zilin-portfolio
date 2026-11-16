@@ -3,6 +3,7 @@ import { EffectComposer } from '../assets/vendor/addons/postprocessing/EffectCom
 import { RenderPass } from '../assets/vendor/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from '../assets/vendor/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from '../assets/vendor/addons/postprocessing/OutputPass.js';
+import { createFluid } from './fluid.js';
 
 /* ============================================================
    三维档案场景：圆环螺旋排布 + 滚动相机 + 自定义卡片 shader
@@ -41,6 +42,48 @@ import { OutputPass } from '../assets/vendor/addons/postprocessing/OutputPass.js
   var group = new THREE.Group();
   scene.add(group);
 
+  // 流体层：铺在卡片后方，鼠标划过时产生墨迹般的扰动
+  var fluid = null, fluidMat = null, fluidPlane = null;
+  var lastSplat = 0, lastAuto = 0;
+  var scratchColor = new THREE.Color();
+  try {
+    var small = stage.clientWidth < 760;
+    fluid = createFluid(renderer, THREE, { sim: small ? 96 : 128, dye: small ? 384 : 512, iterations: small ? 12 : 18 });
+    fluidMat = new THREE.ShaderMaterial({
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        tFluid: { value: fluid.texture() },
+        uColor: { value: readSignal() },
+        uIntensity: { value: 1.1 }
+      },
+      vertexShader: [
+        'varying vec2 vUv;',
+        'void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }'
+      ].join('\n'),
+      fragmentShader: [
+        'precision highp float;',
+        'uniform sampler2D tFluid;',
+        'uniform vec3 uColor;',
+        'uniform float uIntensity;',
+        'varying vec2 vUv;',
+        'void main(){',
+        '  vec3 c = texture2D(tFluid, vUv).rgb;',
+        '  float a = max(c.r, max(c.g, c.b));',
+        '  gl_FragColor = vec4(c * uColor * uIntensity, a * .6);',
+        '}'
+      ].join('\n')
+    });
+    fluidPlane = new THREE.Mesh(new THREE.PlaneGeometry(30, 18), fluidMat);
+    fluidPlane.position.z = -9;
+    fluidPlane.renderOrder = -10;
+    scene.add(fluidPlane);
+  } catch (e) {
+    fluid = null;
+  }
+
   // Bloom：让信号色描边与粒子产生辉光
   var composer = null;
   var bloom = null;
@@ -49,9 +92,9 @@ import { OutputPass } from '../assets/vendor/addons/postprocessing/OutputPass.js
     composer.addPass(new RenderPass(scene, camera));
     bloom = new UnrealBloomPass(
       new THREE.Vector2(stage.clientWidth, stage.clientHeight),
-      stage.clientWidth < 720 ? .42 : .62,
-      .55,
-      .58
+      stage.clientWidth < 720 ? .34 : .5,
+      .5,
+      .72
     );
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
@@ -320,6 +363,17 @@ import { OutputPass } from '../assets/vendor/addons/postprocessing/OutputPass.js
     pMat.uniforms.uColor.value.copy(baseColor);
     pMat.uniforms.uPixelRatio.value = DPR;
 
+    if (fluid) {
+      fluid.step(1 / 60);
+      fluidMat.uniforms.tFluid.value = fluid.texture();
+      fluidMat.uniforms.uColor.value.copy(baseColor);
+      if (performance.now() - lastAuto > 2600) {
+        lastAuto = performance.now();
+        fluid.splat(Math.random(), Math.random(), (Math.random() - .5) * 1400, (Math.random() - .5) * 1400,
+          scratchColor.copy(baseColor).multiplyScalar(.28), .0045);
+      }
+    }
+
     hovered = hitTest();
 
     cards.forEach(function (c, i) {
@@ -362,7 +416,19 @@ import { OutputPass } from '../assets/vendor/addons/postprocessing/OutputPass.js
     return r.bottom > 0 && r.top < window.innerHeight;
   }
 
-  canvas.addEventListener('pointermove', updatePointer, { passive: true });
+  canvas.addEventListener('pointermove', function (e) {
+    var px = pointer.x, py = pointer.y;
+    updatePointer(e);
+    var now = performance.now();
+    if (fluid && now - lastSplat > 28) {
+      var dx = pointer.x - px, dy = pointer.y - py;
+      if (Math.abs(dx) + Math.abs(dy) > .002) {
+        lastSplat = now;
+        scratchColor.copy(baseColor).multiplyScalar(.55);
+        fluid.splat(pointer.x + .5, pointer.y + .5, dx * 3000, dy * 3000, scratchColor, .0034);
+      }
+    }
+  }, { passive: true });
   canvas.addEventListener('pointerleave', function () { ndc.set(-9, -9); hovered = null; });
   canvas.addEventListener('click', function (e) {
     if (e.target !== canvas) return;
@@ -396,6 +462,8 @@ import { OutputPass } from '../assets/vendor/addons/postprocessing/OutputPass.js
   }, { passive: true });
   if (inView()) start();
 })();
+
+
 
 
 
