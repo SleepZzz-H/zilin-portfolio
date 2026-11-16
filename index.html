@@ -1,0 +1,486 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark" data-signal="yellow">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>黄子林 — 艺术与科技 / PORTFOLIO ARCHIVE</title>
+<meta name="description" content="黄子林，湖北美术学院艺术与科技专业。作品档案：信息可视化、交互与生成、视觉系统、空间叙事。" />
+<meta name="theme-color" content="#15160f" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 21 7v10l-9 5-9-5V7z' fill='none' stroke='%23e2f21a' stroke-width='1.6'/%3E%3Cpath d='M12 7.4 16.4 12 12 16.6 7.6 12z' fill='%23e2f21a'/%3E%3C/svg%3E" />
+<link rel="preload" href="assets/works/portrait.jpg" as="image" />
+<link rel="stylesheet" href="css/theme.css" />
+<link rel="stylesheet" href="css/style.css" />
+<script>
+document.documentElement.classList.add('js');
+try {
+  var t = localStorage.getItem('efl-theme');
+  if (t) document.documentElement.dataset.theme = t;
+  var s = localStorage.getItem('efl-signal');
+  if (s) document.documentElement.dataset.signal = s;
+} catch (e) {}
+setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 1600);
+</script>
+<noscript><style>.boot{display:none}.reveal{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>
+</head>
+<body>
+
+<!-- ============ 启动屏 ============ -->
+<div class="boot" id="boot" aria-hidden="true">
+  <div class="boot-grid" aria-hidden="true"></div>
+  <div class="boot-scan" aria-hidden="true"></div>
+  <div class="boot-head"><span>HIFA / ART × TECHNOLOGY</span><span>ID 2024001113</span></div>
+  <div class="boot-core">
+    <p class="boot-kicker">OPERATOR ARCHIVE — 档案加载中</p>
+    <h2 class="boot-name">
+      <span class="boot-l1" data-scramble>HUANG</span>
+      <span class="boot-l2" data-scramble>ZILIN</span>
+      <em class="boot-alias">LINDEN HUANG</em>
+    </h2>
+    <p class="boot-pinyin">黄 子 林 <i>/</i> HUANG ZILIN</p>
+  </div>
+  <div class="boot-foot">
+    <div class="boot-track"><i></i></div>
+    <p class="boot-s"><span data-boot>READING OPERATOR ID</span><b>00%</b></p>
+  </div>
+</div>
+
+<!-- 滚动进度 -->
+<div class="scroll-progress" aria-hidden="true"><i id="progressBar"></i></div>
+
+<!-- 准星光标 -->
+<div class="xhair" id="xhair" aria-hidden="true"><i class="xh-v"></i><i class="xh-h"></i><i class="xh-ring"></i><b class="xh-d"></b></div>
+
+<!-- 固定坐标读数 -->
+<div class="coord-hud" aria-hidden="true"><span>POINTER / 指针坐标</span><b id="hudXY">X 0000 · Y 0000</b></div>
+
+<!-- 换色闪光 -->
+<div class="flash" id="flash" aria-hidden="true"></div>
+
+<!-- CRT 扫描线 -->
+<div class="crt" aria-hidden="true"></div>
+
+<!-- ============ 顶栏 ============ -->
+<header class="bar">
+  <a class="brand" href="#top" aria-label="回到首页">
+    <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 21 7v10l-9 5-9-5V7z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M12 7.4 16.4 12 12 16.6 7.6 12z" fill="currentColor"/></svg>
+    <span class="brand-txt">HIFA<em>/ 黄子林 · 艺术与科技</em></span>
+  </a>
+  <div class="bar-mid">
+    <span class="pulse" aria-hidden="true"></span>
+    <span>链路稳定 / LINK STABLE</span>
+    <span class="bar-coords" id="coordXY" aria-hidden="true">X 0000 · Y 0000</span>
+    <span class="bar-coords bar-coords-depth" id="coordDepth" aria-hidden="true">DEPTH 000%</span>
+    <span class="bar-clock" id="clock" aria-hidden="true">00:00:00</span>
+    <button class="sound-toggle" id="soundBtn" type="button" aria-pressed="false" aria-label="开启交互音效">SOUND <b>[|]</b></button>
+    <button class="sound-toggle" id="musicBtn" type="button" aria-pressed="false" aria-label="开启背景音乐">MUSIC <b>[|]</b></button>
+    <span class="vol-inline" title="背景音乐音量"><em>VOL</em><input type="range" data-music-vol min="0" max="100" value="45" aria-label="背景音乐音量" /><b>45</b></span>
+  </div>
+  <div class="bar-acts">
+    <button class="ibtn" id="themeBtn" type="button" aria-label="切换明暗主题">
+      <span class="ibtn-txt">DARK</span>
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M8 0v3M8 13v3M0 8h3M13 8h3" stroke="currentColor" stroke-width="1.2"/></svg>
+    </button>
+    <button class="ibtn ibtn-menu" id="menuBtn" type="button" aria-expanded="false" aria-controls="drawer">
+      <span class="ibtn-txt">MENU</span>
+      <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+  </div>
+</header>
+
+<!-- ============ 侧边导航 ============ -->
+<aside class="rail" aria-label="章节导航">
+  <span class="rail-tag">ARCHIVE / 作品集 2026</span>
+  <nav class="rail-nav" id="railNav">
+    <a href="#top" data-sec="top"><i>00</i><span>INDEX</span></a>
+    <a href="#manifest" data-sec="manifest"><i>01</i><span>MANIFEST</span></a>
+    <a href="#works" data-sec="works"><i>02</i><span>ARCHIVE</span></a>
+    <a href="#capability" data-sec="capability"><i>03</i><span>MATRIX</span></a>
+    <a href="#log" data-sec="log"><i>04</i><span>LOG</span></a>
+    <a href="#link" data-sec="link"><i>05</i><span>LINK</span></a>
+  </nav>
+  <span class="rail-no" id="railNo">00</span>
+</aside>
+
+<main id="top">
+
+  <!-- ============ 主视觉 ============ -->
+  <section class="hero">
+    <div class="hero-grid" aria-hidden="true"></div>
+    <div class="hero-arc" aria-hidden="true"></div>
+    <div class="brackets" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+    <div class="hero-main">
+      <p class="kicker">
+        <span class="kicker-tag">FILE 00</span>
+        <span>HUANG ZILIN — HIFA ART × TECHNOLOGY</span>
+      </p>
+
+      <h1 class="h1">
+        <span class="h1-en" data-scramble aria-hidden="true">ART × TECHNOLOGY</span>
+        <span class="h1-cn">在技术与艺术的<br />交界处建造</span>
+      </h1>
+
+      <div class="hero-signature">
+        <span class="hz-seal" aria-hidden="true">HZ</span>
+        <div class="hz-id">
+          <b>黄子林 <i>/</i> HUANG ZILIN</b>
+          <span>湖北美术学院 · 艺术与科技 · 2024 级</span>
+        </div>
+        <span class="hz-alias">ALIAS <b>LINDEN</b></span>
+      </div>
+
+      <p class="lede">
+        湖北美术学院艺术与科技专业在读。把代码当画笔，把光、材质与数据当颜料，
+        在界面、装置与影像之间，建造能被看见、能被触碰的系统。
+      </p>
+
+      <div class="hero-btns">
+        <a class="btn btn-solid" href="#works"><span>进入档案库</span><i class="btn-ico">▶</i></a>
+        <a class="btn btn-line" href="#link"><span>建立联络</span><i class="btn-ico">↗</i></a>
+      </div>
+
+      <dl class="hero-meta">
+        <div><dt>姓名 / NAME</dt><dd>黄子林 · LINDEN</dd></div>
+        <div><dt>院校 / SCHOOL</dt><dd>湖北美术学院 HIFA</dd></div>
+        <div><dt>学号 / ID.</dt><dd>2024001113</dd></div>
+        <div><dt>状态 / STATUS</dt><dd class="sig">● 在读 · 本科</dd></div>
+      </dl>
+    </div>
+
+    <aside class="hcard">
+      <div class="hcard-head">
+        <span>HUANG ZILIN / ARCHIVE</span><b data-scramble>SECTOR 10</b>
+      </div>
+      <div class="radar">
+        <i class="ring r1"></i><i class="ring r2"></i><i class="ring r3"></i>
+        <i class="radar-sweep"></i>
+        <i class="radar-cross"></i>
+        <div class="radar-core">
+          <b>10</b><span>ARCHIVED<br />WORKS</span>
+        </div>
+        <span class="radar-tag rt1">艺术</span>
+        <span class="radar-tag rt2">科技</span>
+        <span class="radar-tag rt3">体验</span>
+      </div>
+      <dl class="hcard-rows">
+        <div><dt>OPERATOR</dt><dd>黄子林</dd></div>
+        <div><dt>ALIAS</dt><dd>LINDEN HUANG</dd></div>
+        <div><dt>FIELD</dt><dd>艺术与科技</dd></div>
+        <div><dt>BASE</dt><dd>武汉 · HIFA</dd></div>
+      </dl>
+      <div class="hcard-bar">
+        <span>10 WORKS / 08 COURSES / 09 TOOLS</span>
+        <i class="hatch" aria-hidden="true"></i>
+      </div>
+    </aside>
+
+    <div class="hero-foot">
+      <div class="ruler" aria-hidden="true"></div>
+      <div class="hero-foot-row">
+        <span data-hudline>LAT 30.5531 / LON 114.3487</span>
+        <span data-hudline>PHASE 03 · DEPLOYED</span>
+        <a class="scroll-hint" href="#manifest"><i aria-hidden="true"></i>SCROLL TO READ</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 跑马灯 ============ -->
+  <div class="ticker" aria-hidden="true">
+    <i class="ticker-hatch"></i>
+    <div class="ticker-track">
+      <span>▚ 工业编辑风 / INDUSTRIAL EDITORIAL</span><span>◆</span>
+      <span>交互设计 INTERACTION</span><span>◆</span>
+      <span>数据可视化 DATA VIZ</span><span>◆</span>
+      <span>视觉系统 VISUAL SYSTEM</span><span>◆</span>
+      <span>空间叙事 SPATIAL NARRATIVE</span><span>◆</span>
+      <span>生成艺术 GENERATIVE</span><span>◆</span>
+      <span>▚ 工业编辑风 / INDUSTRIAL EDITORIAL</span><span>◆</span>
+      <span>交互设计 INTERACTION</span><span>◆</span>
+      <span>数据可视化 DATA VIZ</span><span>◆</span>
+      <span>视觉系统 VISUAL SYSTEM</span><span>◆</span>
+      <span>空间叙事 SPATIAL NARRATIVE</span><span>◆</span>
+      <span>生成艺术 GENERATIVE</span><span>◆</span>
+    </div>
+  </div>
+
+  <!-- ============ 01 自述 ============ -->
+  <section class="sec" id="manifest">
+    <header class="sec-head reveal">
+      <span class="sec-idx">01</span>
+      <h2 class="sec-title">自述<span class="en" data-scramble>MANIFEST</span></h2>
+      <span class="sec-rule"></span>
+      <span class="sec-meta">// 档案 · 2026</span>
+    </header>
+
+    <div class="manifest">
+      <figure class="mcard reveal">
+        <div class="mcard-media">
+          <img src="assets/works/portrait.jpg" alt="档案配图：《壳记忆年》信息可视化版面局部" loading="lazy" decoding="async" />
+          <i class="mcard-scan" aria-hidden="true"></i>
+          <span class="mcard-idx">ID-01</span>
+        </div>
+        <figcaption class="mcard-kv">
+          <div><span>NAME</span><b>黄子林</b></div>
+          <div><span>SCHOOL</span><b>湖北美术学院</b></div>
+          <div><span>CLASS</span><b>艺术与科技</b></div>
+          <div><span>STATE</span><b class="sig">● ACTIVE</b></div>
+        </figcaption>
+        <div class="mcard-code" aria-hidden="true"></div>
+      </figure>
+
+      <div class="manifest-body">
+        <p class="lead reveal">
+          我不把界面当装饰，<br />
+          而是把它当作一台<em>可阅读的机器</em>。
+        </p>
+        <div class="prose reveal">
+          <p>
+            我是黄子林，湖北美术学院艺术与科技专业在读。关注的是「信息如何被感知」：
+            把复杂的系统拆成能被读懂的层级，用版式、刻度、标记与留白建立秩序，
+            再让一处高饱和的颜色负责说话。
+          </p>
+          <p>
+            课程之外，我用 TouchDesigner 做声音与手势的实时交互，用 Processing 写生成图形，
+            用 SketchUp 与 Enscape 把叙事推到空间里，也动手做实体模型。
+            所有作品都在同一条线上：技术不是效果，而是让内容被读懂的那层结构。
+          </p>
+        </div>
+        <ul class="principles reveal">
+          <li><b>克制</b><span>纸与墨是主体，颜色是信号——只留一处。</span></li>
+          <li><b>秩序</b><span>先立栅格与刻度，再谈风格。</span></li>
+          <li><b>可读</b><span>中文负责阅读，英文负责结构。</span></li>
+          <li><b>利落</b><span>动效 0.2–0.3 秒，硬收尾，不回弹。</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stats reveal">
+      <div class="stat"><b>10</b><span>归档作品 / WORKS</span></div>
+      <div class="stat"><b>08</b><span>课程项目 / COURSES</span></div>
+      <div class="stat"><b>09</b><span>工具与设备 / TOOLS</span></div>
+      <div class="stat"><b>04</b><span>创作方向 / FIELDS</span></div>
+    </div>
+  </section>
+
+  <!-- ============ 02 作品 ============ -->
+  <section class="sec" id="works">
+    <header class="sec-head reveal">
+      <span class="sec-idx">02</span>
+      <h2 class="sec-title">作品档案<span class="en" data-scramble>ARCHIVE</span></h2>
+      <span class="sec-rule"></span>
+      <button class="sec-meta sec-meta-btn" type="button" data-open-first>// 全部展开 ▶</button>
+    </header>
+
+    <div class="filters" id="filters" role="group" aria-label="作品分类筛选">
+      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">全部 <em>ALL</em><i>10</i></button>
+      <button class="filter" type="button" data-filter="interface" aria-pressed="false">界面交互 <em>UI</em><i>3</i></button>
+      <button class="filter" type="button" data-filter="dataviz" aria-pressed="false">数据可视化 <em>DATA</em><i>2</i></button>
+      <button class="filter" type="button" data-filter="visual" aria-pressed="false">视觉系统 <em>VISUAL</em><i>2</i></button>
+      <button class="filter" type="button" data-filter="space" aria-pressed="false">空间叙事 <em>SPACE</em><i>3</i></button>
+    </div>
+
+    <div class="wgrid" id="workGrid"></div>
+
+    <div class="sec-foot reveal">
+      <span>// 档案为节选，完整项目与过程稿可来信索取</span>
+      <a class="btn btn-line btn-sm" href="#link"><span>索取完整档案</span><i class="btn-ico">↗</i></a>
+    </div>
+  </section>
+
+  <!-- ============ 03 能力 ============ -->
+  <section class="sec" id="capability">
+    <header class="sec-head reveal">
+      <span class="sec-idx">03</span>
+      <h2 class="sec-title">能力模组<span class="en" data-scramble>MATRIX</span></h2>
+      <span class="sec-rule"></span>
+      <span class="sec-meta">// 自评刻度</span>
+    </header>
+
+    <div class="cap">
+      <div class="cap-bars reveal">
+        <div class="capbar"><div class="bar-top"><span>信息可视化 / DATA VIZ</span><b>88</b></div><div class="bar-track"><i style="--v:88%"></i><em class="ticks"></em></div><p>资料整理、编码规则、版面层级；从数据到叙事的完整链路。</p></div>
+        <div class="capbar"><div class="bar-top"><span>视觉与版式 / VISUAL</span><b>90</b></div><div class="bar-track"><i style="--v:90%"></i><em class="ticks"></em></div><p>展板、配色系统与插图，印刷与屏幕用同一套语言。</p></div>
+        <div class="capbar"><div class="bar-top"><span>交互与生成 / INTERACTIVE</span><b>84</b></div><div class="bar-track"><i style="--v:84%"></i><em class="ticks"></em></div><p>TouchDesigner 实时交互与 Processing 生成图形。</p></div>
+        <div class="capbar"><div class="bar-top"><span>三维与空间 / SPATIAL</span><b>80</b></div><div class="bar-track"><i style="--v:80%"></i><em class="ticks"></em></div><p>SketchUp 建模、Enscape 渲染与实体模型搭建。</p></div>
+        <div class="capbar"><div class="bar-top"><span>编程 / CODE</span><b>74</b></div><div class="bar-track"><i style="--v:74%"></i><em class="ticks"></em></div><p>p5.js / Processing / HTML·CSS，能把想法写成可跑的原型。</p></div>
+      </div>
+
+      <aside class="cap-tools reveal">
+        <div class="tools-group">
+          <h3>视觉 / VISUAL</h3>
+          <ul><li>Illustrator</li><li>Photoshop</li><li>InDesign</li><li>Procreate</li></ul>
+        </div>
+        <div class="tools-group">
+          <h3>生成与交互 / GENERATIVE</h3>
+          <ul><li>TouchDesigner</li><li>Processing</li><li>p5.js</li><li>HTML · CSS</li></ul>
+        </div>
+        <div class="tools-group">
+          <h3>三维与空间 / 3D</h3>
+          <ul><li>SketchUp</li><li>Enscape</li><li>AutoCAD</li><li>Blender</li></ul>
+        </div>
+        <div class="tools-group">
+          <h3>输出与手工 / OUTPUT</h3>
+          <ul><li>After Effects</li><li>Premiere</li><li>展板输出</li><li>模型手工</li></ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ 04 履历 ============ -->
+  <section class="sec" id="log">
+    <header class="sec-head reveal">
+      <span class="sec-idx">04</span>
+      <h2 class="sec-title">履历日志<span class="en" data-scramble>LOG</span></h2>
+      <span class="sec-rule"></span>
+      <span class="sec-meta">// 2024 — 2026</span>
+    </header>
+
+    <ol class="log">
+      <li class="reveal">
+        <span class="log-year">2026</span>
+        <div class="log-body"><h3>联合工作营 · 《心跳回响》《秋林拾光》</h3><p>完成情绪识别交互装置与湖畔场景设计两组联合作品，从概念、搭建到展陈叙述全程参与。</p></div>
+        <span class="log-tag">工作营</span>
+      </li>
+      <li class="reveal">
+        <span class="log-year">2026</span>
+        <div class="log-body"><h3>《声涡掌御》· 可视化交互与艺术媒体</h3><p>用 TouchDesigner 搭建音频特征与粒子系统的映射，接入摄像头手势识别，完成实时影像与展板输出。</p></div>
+        <span class="log-tag">课程</span>
+      </li>
+      <li class="reveal">
+        <span class="log-year">2026</span>
+        <div class="log-body"><h3>《壳记忆年》· 信息可视化双联</h3><p>以菊石化石为对象的两张展板：一张做时间与演化的编码，一张讲埋藏与矿化的流程。</p></div>
+        <span class="log-tag">课程</span>
+      </li>
+      <li class="reveal">
+        <span class="log-year">2026</span>
+        <div class="log-body"><h3>开源编程 · 生成花纹</h3><p>Processing 参数化练习：把坐标、正弦波与色彩映射写成可复用的生成系统。</p></div>
+        <span class="log-tag">课程</span>
+      </li>
+      <li class="reveal">
+        <span class="log-year">2025</span>
+        <div class="log-body"><h3>《年轮之誓》· 空间建构</h3><p>婚礼仪式空间：从社会学调研、概念叙事到平立剖与 Enscape 渲染的完整方案。</p></div>
+        <span class="log-tag">课程</span>
+      </li>
+      <li class="reveal">
+        <span class="log-year">2025</span>
+        <div class="log-body"><h3>空间建造 · 微缩场景模型</h3><p>椴木、苔藓与环氧树脂的实体搭建，用 1:50 的比例验证材料与尺度。</p></div>
+        <span class="log-tag">课程</span>
+      </li>
+      <li class="reveal">
+        <span class="log-year">2024</span>
+        <div class="log-body"><h3>进入湖北美术学院 · 艺术与科技</h3><p>开始同时学画画与写代码：图形、材质、空间与交互，慢慢长成一套自己的工作方式。</p></div>
+        <span class="log-tag">起点</span>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ============ 05 联络 ============ -->
+  <section class="sec link" id="link">
+    <div class="link-ghost" data-scramble aria-hidden="true">LINK UP</div>
+    <header class="sec-head reveal">
+      <span class="sec-idx">05</span>
+      <h2 class="sec-title">建立联络<span class="en" data-scramble>LINK</span></h2>
+      <span class="sec-rule"></span>
+      <span class="sec-meta">// 24H 内回应</span>
+    </header>
+
+    <div class="link-main">
+      <p class="link-lead reveal">想看完整项目，<br />或者聊聊合作？发一段信号过来。</p>
+      <a class="mail reveal" href="mailto:1417770486@qq.com">
+        <span>1417770486@qq.com</span><i aria-hidden="true">↗</i>
+      </a>
+      <ul class="link-list reveal">
+        <li><a href="tel:13469972926"><b>手机</b><span>134 6997 2926 / 拨打</span><i>↗</i></a></li>
+        <li><a href="https://github.com/SleepZzz-H" target="_blank" rel="noopener"><b>GitHub</b><span>github.com/SleepZzz-H / CODE</span><i>↗</i></a></li>
+        <li><a href="#" rel="noopener"><b>小红书</b><span>过程记录 / PROCESS</span><i>↗</i></a></li>
+        <li><a href="#" rel="noopener"><b>哔哩哔哩</b><span>影像与装置 / VIDEO</span><i>↗</i></a></li>
+        <li><a href="#" data-copy="hifa_design"><b>微信</b><span>hifa_design / 复制</span><i>⧉</i></a></li>
+      </ul>
+    </div>
+
+    <figure class="link-kv reveal">
+      <img src="assets/works/keyvisual.jpg" alt="《年轮之誓》婚礼仪式空间 Enscape 渲染" loading="lazy" decoding="async" />
+      <figcaption><span>KEY VISUAL / 年轮之誓 · 2025</span><span>湖北美术学院 · 艺术与科技</span></figcaption>
+    </figure>
+  </section>
+</main>
+
+<footer class="foot">
+  <i class="foot-hatch" aria-hidden="true"></i>
+  <div class="foot-row">
+    <span>© 2026 黄子林 — 湖北美术学院 · 艺术与科技 / PORTFOLIO ARCHIVE</span>
+    <div class="vol-control"><span>背景音乐音量 / BGM VOL</span><input type="range" data-music-vol min="0" max="100" value="45" aria-label="背景音乐音量" /><b>45</b></div>
+    <div class="signal-picker" role="group" aria-label="信号色切换">
+      <span>信号色</span>
+      <button type="button" data-signal="yellow" class="is-on" aria-label="信号黄"></button>
+      <button type="button" data-signal="cyan" aria-label="信号青"></button>
+      <button type="button" data-signal="rose" aria-label="信号粉"></button>
+    </div>
+    <span class="foot-ver">BUILD 1.0.0 · SYSTEMS NOMINAL</span>
+  </div>
+  <p class="foot-note">视觉语言参考《明日方舟：终末地》官网与游戏界面，仅作个人设计练习，非官方作品。</p>
+</footer>
+
+<!-- ============ 移动端抽屉 ============ -->
+<nav class="drawer" id="drawer" aria-label="移动端导航">
+  <a href="#top" data-close-drawer><i>00</i>INDEX<span>主视觉</span></a>
+  <a href="#manifest" data-close-drawer><i>01</i>MANIFEST<span>自述</span></a>
+  <a href="#works" data-close-drawer><i>02</i>ARCHIVE<span>作品</span></a>
+  <a href="#capability" data-close-drawer><i>03</i>MATRIX<span>能力</span></a>
+  <a href="#log" data-close-drawer><i>04</i>LOG<span>履历</span></a>
+  <a href="#link" data-close-drawer><i>05</i>LINK<span>联络</span></a>
+</nav>
+
+<!-- ============ 作品详情弹窗 ============ -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" aria-hidden="true">
+  <div class="modal-scrim" data-close></div>
+  <div class="modal-panel">
+    <div class="brackets" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <header class="modal-head">
+      <span class="m-no" id="mNo">01</span>
+      <span class="m-cat" id="mCat">界面交互</span>
+      <button class="ibtn m-close" type="button" data-close aria-label="关闭">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.4"/></svg>
+      </button>
+    </header>
+    <div class="modal-body">
+      <figure class="m-media">
+        <img id="mImg" src="" alt="" />
+        <div class="m-video-wrap" id="mVideoWrap" hidden>
+          <video id="mVideo" controls playsinline preload="none"></video>
+          <span class="m-video-tag">PROCESS FILM / 过程影像</span>
+        </div>
+        <div class="m-gallery" id="mGallery" hidden></div>
+      </figure>
+      <div class="m-info">
+        <h3 id="mTitle">—</h3>
+        <p class="m-en" id="mEn">—</p>
+        <p class="m-desc" id="mDesc">—</p>
+        <dl class="m-spec" id="mSpec"></dl>
+      </div>
+    </div>
+    <footer class="modal-foot">
+      <button class="m-nav" type="button" data-step="-1">← 上一份</button>
+      <span class="m-count" id="mCount">01 / 10</span>
+      <button class="m-nav" type="button" data-step="1">下一份 →</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ============ 图片放大预览 ============ -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="图片预览" aria-hidden="true">
+  <span class="lb-count" id="lbCount">01 / 01</span>
+  <button class="lb-close" type="button" data-lb-close aria-label="关闭预览">×</button>
+  <button class="lb-nav lb-prev" type="button" data-lb-step="-1" aria-label="上一张">←</button>
+  <img id="lbImg" src="" alt="" />
+  <button class="lb-nav lb-next" type="button" data-lb-step="1" aria-label="下一张">→</button>
+  <span class="lb-cap" id="lbCap"></span>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
+
+
+
