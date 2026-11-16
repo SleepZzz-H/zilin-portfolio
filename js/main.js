@@ -372,12 +372,15 @@
       cards.forEach(function (c, i) {
         var d = i - focus;
         var ad = Math.abs(d);
-        var X = d * 430;
-        var Z = -ad * 300;
-        var Y = ad * 26;
-        var rot = -d * 30;
+        var angle = d * .62;
+        var R = 700;
+        var X = Math.sin(angle) * R + 60;
+        var Z = (Math.cos(angle) - 1) * R;
+        var Y = -d * 30;
+        var rot = -angle * 57.2958;
         var sc = Math.max(.55, 1 - ad * .2);
-        var op = Math.max(0, 1 - ad * .42);
+        var op = Math.max(0, 1 - ad * .55);
+        c.style.filter = ad > 1.6 ? 'blur(' + Math.min(3, (ad - 1.6) * 1.4).toFixed(1) + 'px)' : 'none';
         c.style.transform = 'translate3d(calc(-50% + ' + X.toFixed(1) + 'px), calc(-50% + ' + Y.toFixed(1) +
           'px), ' + Z.toFixed(1) + 'px) rotateY(' + rot.toFixed(1) + 'deg) scale(' + sc.toFixed(3) + ')';
         c.style.opacity = op.toFixed(2);
@@ -429,7 +432,105 @@
     });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', function () { paint(); });
+
+    stage.addEventListener('pointermove', function (e) {
+      var r = stage.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width;
+      var y = (e.clientY - r.top) / r.height;
+      stage.style.setProperty('--par-x', (x - .5).toFixed(3));
+      stage.style.setProperty('--par-y', (y - .5).toFixed(3));
+      var hit = e.target.closest('.orbit-card');
+      if (hit) {
+        hit.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
+        hit.style.setProperty('--my', (y * 100).toFixed(1) + '%');
+      }
+    }, { passive: true });
+
     build();
+  })();
+
+  /* ---------- 档案背景粒子 ---------- */
+  (function orbitParticles() {
+    var canvas = document.getElementById('orbitParticles');
+    var stage = document.getElementById('orbitStage');
+    if (!canvas || !stage || !canvas.getContext) return;
+    var ctx = canvas.getContext('2d');
+    var ps = [], W = 0, H = 0, dpr = 1, raf = null, visible = true;
+    var mx = -9999, my = -9999, sig = [223, 242, 26], frame = 0;
+
+    function readSignal() {
+      var v = getComputedStyle(document.documentElement).getPropertyValue('--signal').trim().replace('#', '');
+      if (v.length === 3) v = v.split('').map(function (c) { return c + c; }).join('');
+      var n = parseInt(v, 16);
+      if (!isNaN(n)) sig = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+    function seed() {
+      ps = [];
+      var count = Math.min(140, Math.round((W * H) / 15000));
+      for (var i = 0; i < count; i++) {
+        ps.push({
+          x: Math.random() * W, y: Math.random() * H,
+          vx: (Math.random() - .5) * .32, vy: (Math.random() - .5) * .32,
+          r: Math.random() * 1.5 + .4, a: Math.random() * .45 + .18,
+          s: Math.random() < .3
+        });
+      }
+    }
+    function resize() {
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = stage.clientWidth; H = stage.clientHeight;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      seed();
+    }
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      frame++;
+      if (frame % 90 === 0) readSignal();
+      for (var i = 0; i < ps.length; i++) {
+        var p = ps[i];
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < -12) p.x = W + 12;
+        if (p.x > W + 12) p.x = -12;
+        if (p.y < -12) p.y = H + 12;
+        if (p.y > H + 12) p.y = -12;
+        var dx = p.x - mx, dy = p.y - my;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 140 && dist > .1) {
+          var f = (140 - dist) / 140;
+          p.x += (dx / dist) * f * 2.2;
+          p.y += (dy / dist) * f * 2.2;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.s
+          ? 'rgba(' + sig[0] + ',' + sig[1] + ',' + sig[2] + ',' + (p.a * .5).toFixed(2) + ')'
+          : 'rgba(241,240,234,' + p.a.toFixed(2) + ')';
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(draw);
+    }
+    function start() { if (!raf) raf = requestAnimationFrame(draw); }
+    function stop() { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+
+    stage.addEventListener('pointermove', function (e) {
+      var r = stage.getBoundingClientRect();
+      mx = e.clientX - r.left; my = e.clientY - r.top;
+    }, { passive: true });
+    stage.addEventListener('pointerleave', function () { mx = my = -9999; });
+    window.addEventListener('resize', resize);
+
+    resize();
+    readSignal();
+    if (reduce) { draw(); stop(); }
+    else if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (en) {
+        visible = en[0].isIntersecting;
+        if (visible) start(); else stop();
+      }, { threshold: .02 });
+      io.observe(stage);
+    } else { start(); }
   })();
 
   /* ---------- 作品弹窗 ---------- */
