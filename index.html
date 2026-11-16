@@ -107,6 +107,7 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
   <section class="hero">
     <div class="hero-grid" aria-hidden="true"></div>
     <div class="hero-arc" aria-hidden="true"></div>
+    <div class="hero-slash" aria-hidden="true"></div>
     <div class="brackets" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 
     <div class="hero-main">
@@ -277,6 +278,29 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
       <button class="filter" type="button" data-filter="dataviz" aria-pressed="false">数据可视化 <em>DATA</em><i>3</i></button>
       <button class="filter" type="button" data-filter="visual" aria-pressed="false">视觉系统 <em>VISUAL</em><i>2</i></button>
       <button class="filter" type="button" data-filter="space" aria-pressed="false">空间叙事 <em>SPACE</em><i>3</i></button>
+    </div>
+
+    <div class="view-bar">
+      <div class="view-switch" id="viewSwitch" role="group" aria-label="作品排版视图">
+        <button type="button" data-view="grid" class="is-on" aria-pressed="true">▦ 网格 GRID</button>
+        <button type="button" data-view="focus" aria-pressed="false">▣ 聚焦 FOCUS</button>
+        <button type="button" data-view="flow" aria-pressed="false">▤ 长廊 FLOW</button>
+      </div>
+      <span class="view-hint" id="viewHint">悬停查看 · 点击进入档案</span>
+    </div>
+
+    <div class="focus-stage" id="focusStage" hidden>
+      <div class="focus-main">
+        <div class="focus-media" id="focusMedia"></div>
+        <div class="focus-info">
+          <span class="focus-no" id="focusNo">01</span>
+          <h3 id="focusTitle">—</h3>
+          <p class="focus-en" id="focusEn">—</p>
+          <p class="focus-desc" id="focusDesc">—</p>
+          <button class="btn btn-solid" type="button" id="focusOpen" data-open="01"><span>查看完整档案</span><i class="btn-ico">▶</i></button>
+        </div>
+      </div>
+      <div class="focus-rail" id="focusRail" role="group" aria-label="切换聚焦作品"></div>
     </div>
 
     <div class="wgrid" id="workGrid"></div>

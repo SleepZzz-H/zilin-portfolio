@@ -166,6 +166,95 @@
     return works.filter(function (w) { return currentFilter === 'all' || w.cat === currentFilter; });
   }
 
+  /* ---------- 作品排版视图：网格 / 聚焦 / 长廊 ---------- */
+  (function views() {
+    var sw = document.getElementById('viewSwitch');
+    var stage = document.getElementById('focusStage');
+    var media = document.getElementById('focusMedia');
+    var no = document.getElementById('focusNo');
+    var title = document.getElementById('focusTitle');
+    var en = document.getElementById('focusEn');
+    var desc = document.getElementById('focusDesc');
+    var openBtn = document.getElementById('focusOpen');
+    var rail = document.getElementById('focusRail');
+    var hint = document.getElementById('viewHint');
+    if (!sw || !grid || !stage || !rail) return;
+    var mode = 'grid', active = null, dragging = false, lastX = 0, lastScroll = 0;
+
+    function renderFocus() {
+      var items = visibleWorks();
+      if (!items.length) return;
+      if (!items.some(function (w) { return w.no === active; })) active = items[0].no;
+      var w = null;
+      items.forEach(function (x) { if (x.no === active) w = x; });
+      if (!w) return;
+      no.textContent = w.no;
+      title.textContent = w.title;
+      en.textContent = w.en + ' · ' + w.year + ' · ' + w.catName;
+      desc.textContent = w.desc;
+      media.innerHTML = '<img src="' + w.img + '" alt="' + w.title + ' 作品图" class="' + (w.fit === 'contain' ? 'is-contain' : '') + '" />';
+      openBtn.setAttribute('data-open', w.no);
+      rail.innerHTML = items.map(function (x) {
+        return '<button type="button" data-focus-no="' + x.no + '" class="' + (x.no === active ? 'is-on' : '') +
+          '" aria-label="聚焦作品：' + x.title + '"><img src="' + x.img + '" alt="" /><b>' + x.no + '</b></button>';
+      }).join('');
+    }
+
+    function setMode(m) {
+      mode = m;
+      grid.classList.toggle('is-flow', m === 'flow');
+      grid.hidden = m === 'focus';
+      stage.hidden = m !== 'focus';
+      Array.prototype.forEach.call(sw.querySelectorAll('button'), function (b) {
+        var on = b.dataset.view === m;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      hint.textContent = m === 'flow' ? '左右拖拽浏览 · 点击进入档案'
+        : m === 'focus' ? '← → 切换作品 · 点击查看完整档案' : '悬停查看 · 点击进入档案';
+      if (m === 'focus') renderFocus();
+      else if (m === 'flow') grid.scrollLeft = 0;
+    }
+
+    sw.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-view]');
+      if (b) setMode(b.dataset.view);
+    });
+    rail.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-focus-no]');
+      if (b) { active = b.dataset.focusNo; renderFocus(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (mode !== 'focus') return;
+      var lb = document.getElementById('lightbox');
+      if (lb && lb.classList.contains('is-open')) return;
+      var items = visibleWorks();
+      var i = -1;
+      items.forEach(function (x, k) { if (x.no === active) i = k; });
+      if (i < 0 || !items.length) return;
+      if (e.key === 'ArrowRight') { active = items[(i + 1) % items.length].no; renderFocus(); }
+      if (e.key === 'ArrowLeft') { active = items[(i - 1 + items.length) % items.length].no; renderFocus(); }
+    });
+    filterBtns.forEach(function (b) {
+      b.addEventListener('click', function () { if (mode === 'focus') setTimeout(renderFocus, 0); });
+    });
+
+    grid.addEventListener('pointerdown', function (e) {
+      if (mode !== 'flow' || e.button !== 0) return;
+      dragging = true; lastX = e.clientX; lastScroll = grid.scrollLeft;
+      grid.classList.add('is-dragging');
+    });
+    grid.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      grid.scrollLeft = lastScroll - (e.clientX - lastX);
+    }, { passive: true });
+    window.addEventListener('pointerup', function () {
+      if (!dragging) return;
+      dragging = false;
+      setTimeout(function () { grid.classList.remove('is-dragging'); }, 0);
+    });
+  })();
+
   /* ---------- 作品弹窗 ---------- */
   (function modal() {
     var el = document.getElementById('modal');
