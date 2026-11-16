@@ -288,7 +288,11 @@
   font-family: var(--font-mono); font-size: 9px; letter-spacing: .3em;
   text-transform: uppercase; color: var(--ink-mute);
 }
-.rail-nav { display: flex; flex-direction: column; gap: 4px; }
+.rail-nav { position: relative; display: flex; flex-direction: column; gap: 4px; }
+.rail-nav::before {
+  content: ""; position: absolute; left: 50%; top: 8px; bottom: 8px;
+  width: 1px; background: var(--line-2); transform: translateX(-50%);
+}
 .rail-nav a {
   position: relative;
   display: grid; place-items: center;
@@ -948,11 +952,23 @@
 }
 
 /* ---------- 三维悬浮档案轮播 ---------- */
-.orbit-wrap { position: relative; margin-top: clamp(10px, 2vw, 20px); }
+.orbit-wrap {
+  position: relative; margin-top: clamp(10px, 2vw, 20px);
+  margin-left: calc(var(--padl) * -1);
+  margin-right: calc(var(--gut) * -1);
+}
+.orbit-wrap::before,
+.orbit-wrap::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 90px;
+  z-index: 45; pointer-events: none;
+}
+.orbit-wrap::before { top: 0; background: linear-gradient(180deg, var(--paper), transparent); opacity: .18; }
+.orbit-wrap::after { bottom: 0; background: linear-gradient(0deg, var(--paper), transparent); opacity: .18; }
 .orbit-stage {
   position: sticky; top: var(--bar);
   height: calc(100svh - var(--bar)); min-height: 560px;
-  overflow: hidden; border: 1px solid var(--line);
+  overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  border-left: 0; border-right: 0;
   background: #08090b; perspective: 1500px;
 }
 .orbit-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
@@ -1070,7 +1086,7 @@
   color: var(--signal);
 }
 .orbit-panel {
-  position: absolute; left: clamp(16px, 2.4vw, 30px); bottom: 64px;
+  position: absolute; left: calc(var(--padl) + clamp(8px, 1vw, 16px)); bottom: 64px;
   z-index: 40; display: flex; flex-direction: column; gap: 14px; max-width: 210px;
   padding: 14px 16px 12px;
   background: rgba(8, 9, 11, .72);

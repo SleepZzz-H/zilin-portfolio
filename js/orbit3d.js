@@ -92,9 +92,9 @@ import { createFluid } from './fluid.js';
     composer.addPass(new RenderPass(scene, camera));
     bloom = new UnrealBloomPass(
       new THREE.Vector2(stage.clientWidth, stage.clientHeight),
-      stage.clientWidth < 720 ? .34 : .5,
+      stage.clientWidth < 720 ? .3 : .44,
       .5,
-      .72
+      .8
     );
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
@@ -126,13 +126,13 @@ import { createFluid } from './fluid.js';
   var baseColor = readSignal();
 
   // 可交互粒子：鼠标靠近时产生旋涡式排斥
-  var pCount = 1400;
+  var pCount = 520;
   var pPos = new Float32Array(pCount * 3);
   var pSeed = new Float32Array(pCount);
   for (var pi = 0; pi < pCount; pi++) {
     pPos[pi * 3] = (Math.random() - .5) * 20;
     pPos[pi * 3 + 1] = (Math.random() - .5) * 12;
-    pPos[pi * 3 + 2] = -9 + Math.random() * 11;
+    pPos[pi * 3 + 2] = -12 + Math.random() * 10;
     pSeed[pi] = Math.random();
   }
   var pGeo = new THREE.BufferGeometry();
@@ -154,7 +154,9 @@ import { createFluid } from './fluid.js';
       'uniform vec2 uMouse;',
       'uniform float uPixelRatio;',
       'varying float vA;',
+      'varying float vSeed;',
       'void main(){',
+      '  vSeed = aSeed;',
       '  vec3 p = position;',
       '  p.y += sin(uTime * .32 + aSeed * 6.283) * .16;',
       '  p.x += cos(uTime * .26 + aSeed * 9.42) * .1;',
@@ -163,22 +165,24 @@ import { createFluid } from './fluid.js';
       '  float dist = length(d);',
       '  float f = smoothstep(3.4, 0.0, dist);',
       '  vec2 dir = d / max(dist, 0.001);',
-      '  p.xy += dir * f * 1.9;',
+      '  p.xy += dir * f * 2.4;',
       '  p.z += f * .8;',
       '  vec4 mv = modelViewMatrix * vec4(p, 1.0);',
-      '  gl_PointSize = (2.0 + aSeed * 2.2) * uPixelRatio * (13.0 / -mv.z);',
+      '  gl_PointSize = (2.2 + aSeed * 1.9) * uPixelRatio * (15.0 / -mv.z);',
       '  gl_Position = projectionMatrix * mv;',
-      '  vA = .18 + f * .82;',
+      '  vA = .12 + f * .8;',
       '}'
     ].join('\n'),
     fragmentShader: [
       'uniform vec3 uColor;',
       'varying float vA;',
+      'varying float vSeed;',
       'void main(){',
       '  vec2 c = gl_PointCoord - .5;',
       '  float d = length(c);',
-      '  float a = smoothstep(.5, 0.0, d) * vA;',
-      '  gl_FragColor = vec4(uColor, a);',
+      '  float a = smoothstep(.5, .3, d) * vA;',
+      '  vec3 col = mix(uColor, vec3(.92, .93, .88), step(.86, vSeed) * .75);',
+      '  gl_FragColor = vec4(col, a);',
       '}'
     ].join('\n')
   });
@@ -203,6 +207,7 @@ import { createFluid } from './fluid.js';
     'uniform vec2 uMouse;',
     'uniform vec3 uColor;',
     'uniform float uDim;',
+    'uniform float uExposure;',
     'varying vec2 vUv;',
     'void main(){',
     '  vec2 uv = vUv;',
@@ -215,7 +220,8 @@ import { createFluid } from './fluid.js';
     '  vec3 c = tex.rgb;',
     '  float g = dot(c, vec3(0.299, 0.587, 0.114));',
     '  c = mix(vec3(g) * 0.86, c, clamp(uActive * 0.9 + uHover * 0.4, 0.0, 1.0));',
-    '  c *= (0.9 + uHover * 0.3 + uActive * 0.16) * uDim;',
+    '  c *= (0.86 + uHover * 0.26 + uActive * 0.14) * uDim * uExposure;',
+    '  c = min(c, vec3(0.9));',
     '  vec2 p = abs(vUv - 0.5) * 2.0;',
     '  float r = 0.045;',
     '  float d = length(max(p - (1.0 - r), 0.0)) - r;',
@@ -230,8 +236,17 @@ import { createFluid } from './fluid.js';
   ].join('\n');
 
   var planeGeo = new THREE.PlaneGeometry(PW, PH, 1, 1);
+  var boxGeo = new THREE.BoxGeometry(PW, PH, .12);
+  var edgeGeo = new THREE.EdgesGeometry(boxGeo);
 
   function makeCard(w) {
+    var card = new THREE.Group();
+
+    var sideMat = new THREE.MeshBasicMaterial({ color: 0x0a0b08 });
+    var box = new THREE.Mesh(boxGeo, sideMat);
+    box.position.z = -.06;
+    card.add(box);
+
     var uniforms = {
       tMap: { value: null },
       uHover: { value: 0 },
@@ -240,7 +255,8 @@ import { createFluid } from './fluid.js';
       uPlaneAspect: { value: PW / PH },
       uMouse: { value: new THREE.Vector2(0, 0) },
       uColor: { value: baseColor.clone() },
-      uDim: { value: 1 }
+      uDim: { value: 1 },
+      uExposure: { value: 1 }
     };
     var material = new THREE.ShaderMaterial({
       uniforms: uniforms,
@@ -250,12 +266,26 @@ import { createFluid } from './fluid.js';
       depthWrite: false,
       side: THREE.DoubleSide
     });
-    var mesh = new THREE.Mesh(planeGeo, material);
-    mesh.userData = { work: w, hover: 0, active: 0, base: null };
+    var front = new THREE.Mesh(planeGeo, material);
+    front.position.z = .061;
+    card.add(front);
+
+    var edges = new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({
+      color: baseColor.clone(), transparent: true, opacity: .32
+    }));
+    edges.position.z = -.06;
+    card.add(edges);
+
+    card.userData = {
+      work: w, hover: 0, active: 0, base: null,
+      fm: material, front: front, edges: edges, box: box
+    };
+
     new THREE.TextureLoader().load(w.img, function (tex) {
       var img = tex.image;
       var max = 1000;
       var finalTex = tex;
+      var exposure = 1;
       if (img && (img.width > max || img.height > max)) {
         var s = Math.min(max / img.width, max / img.height);
         var c = document.createElement('canvas');
@@ -266,21 +296,39 @@ import { createFluid } from './fluid.js';
         finalTex.colorSpace = THREE.SRGBColorSpace;
         tex.dispose();
       }
+      // 采样平均亮度：白底版面自动降曝光，避免 Bloom 过曝
+      var probe = document.createElement('canvas');
+      probe.width = probe.height = 18;
+      var pg = probe.getContext('2d');
+      try {
+        pg.drawImage(finalTex.image, 0, 0, 18, 18);
+        var d = pg.getImageData(0, 0, 18, 18).data;
+        var sum = 0;
+        for (var i = 0; i < d.length; i += 4) {
+          sum += (d[i] * .299 + d[i + 1] * .587 + d[i + 2] * .114) / 255;
+        }
+        var avg = sum / (d.length / 4);
+        exposure = Math.max(.42, Math.min(1.05, .58 / Math.max(.08, avg)));
+      } catch (e) {}
+      uniforms.uExposure.value = exposure;
       finalTex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
       uniforms.tMap.value = finalTex;
       if (finalTex.image && finalTex.image.width) {
         uniforms.uImgAspect.value = finalTex.image.width / finalTex.image.height;
       }
     });
-    return mesh;
+    return card;
   }
 
-  function disposeCard(mesh) {
-    group.remove(mesh);
-    if (mesh.material) {
-      if (mesh.material.uniforms.tMap.value) mesh.material.uniforms.tMap.value.dispose();
-      mesh.material.dispose();
+  function disposeCard(card) {
+    group.remove(card);
+    var ud = card.userData || {};
+    if (ud.fm) {
+      if (ud.fm.uniforms.tMap.value) ud.fm.uniforms.tMap.value.dispose();
+      ud.fm.dispose();
     }
+    if (ud.box && ud.box.material) ud.box.material.dispose();
+    if (ud.edges && ud.edges.material) ud.edges.material.dispose();
   }
 
   function build(list) {
@@ -309,6 +357,7 @@ import { createFluid } from './fluid.js';
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
+    camera.position.z = camera.aspect < .95 ? 13.2 : 9.2;
     camera.updateProjectionMatrix();
     if (composer) composer.setSize(w, h);
     if (bloom) bloom.setSize(w, h);
@@ -332,8 +381,8 @@ import { createFluid } from './fluid.js';
   function hitTest() {
     if (!cards.length) return null;
     raycaster.setFromCamera(ndc, camera);
-    var hits = raycaster.intersectObjects(cards, false);
-    return hits.length ? hits[0].object : null;
+    var hits = raycaster.intersectObjects(cards, true);
+    return hits.length ? hits[0].object.parent : null;
   }
 
   function updateHud(act) {
@@ -381,12 +430,17 @@ import { createFluid } from './fluid.js';
       var isHover = c === hovered;
       c.userData.active += ((isActive ? 1 : 0) - c.userData.active) * .1;
       c.userData.hover += ((isHover ? 1 : 0) - c.userData.hover) * .14;
-      c.material.uniforms.uActive.value = c.userData.active;
-      c.material.uniforms.uHover.value = c.userData.hover;
-      c.material.uniforms.uMouse.value.set(pointer.x, pointer.y);
-      c.material.uniforms.uColor.value.copy(baseColor);
+      var fm = c.userData.fm;
+      fm.uniforms.uActive.value = c.userData.active;
+      fm.uniforms.uHover.value = c.userData.hover;
+      fm.uniforms.uMouse.value.set(pointer.x, pointer.y);
+      fm.uniforms.uColor.value.copy(baseColor);
       var dist = Math.abs(i - focus);
-      c.material.uniforms.uDim.value = Math.max(.32, 1 - dist * .16);
+      fm.uniforms.uDim.value = Math.max(.32, 1 - dist * .16);
+      if (c.userData.edges) {
+        c.userData.edges.material.color.copy(baseColor);
+        c.userData.edges.material.opacity = .18 + c.userData.active * .5 + c.userData.hover * .25;
+      }
       var a = dist === 0 ? 0 : (i - focus) * STEP;
       c.position.x = Math.sin(a) * RADIUS;
       c.position.z = Math.cos(a) * RADIUS - RADIUS + c.userData.hover * .2;
@@ -462,6 +516,8 @@ import { createFluid } from './fluid.js';
   }, { passive: true });
   if (inView()) start();
 })();
+
+
 
 
 
