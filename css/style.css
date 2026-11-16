@@ -1235,6 +1235,21 @@
   font-family: var(--font-mono); font-size: 7.5px; letter-spacing: .06em;
   color: var(--on-soot); background: color-mix(in srgb, var(--soot) 84%, transparent);
 }
+
+/* 交互网页嵌入 */
+.m-embed { grid-column: 1 / -1; border-top: 1px solid var(--line); background: var(--paper-2); }
+.m-embed[hidden] { display: none; }
+.m-embed-bar {
+  display: flex; justify-content: space-between; gap: 10px;
+  padding: 7px 10px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+  color: var(--ink-mute);
+}
+.m-embed-bar a { color: var(--signal); }
+.m-embed iframe {
+  display: block; width: 100%; height: min(58vh, 540px);
+  border: 0; background: #eef1f5;
+}
 .m-info { padding: clamp(14px, 2vw, 26px); }
 .m-info h3 { font-size: clamp(18px, 2.2vw, 24px); font-weight: 800; letter-spacing: .02em; }
 .m-en {

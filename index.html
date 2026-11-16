@@ -149,14 +149,14 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
 
     <aside class="hcard">
       <div class="hcard-head">
-        <span>HUANG ZILIN / ARCHIVE</span><b data-scramble>SECTOR 10</b>
+        <span>HUANG ZILIN / ARCHIVE</span><b data-scramble>SECTOR 11</b>
       </div>
       <div class="radar">
         <i class="ring r1"></i><i class="ring r2"></i><i class="ring r3"></i>
         <i class="radar-sweep"></i>
         <i class="radar-cross"></i>
         <div class="radar-core">
-          <b>10</b><span>ARCHIVED<br />WORKS</span>
+          <b>11</b><span>ARCHIVED<br />WORKS</span>
         </div>
         <span class="radar-tag rt1">艺术</span>
         <span class="radar-tag rt2">科技</span>
@@ -169,7 +169,7 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
         <div><dt>BASE</dt><dd>武汉 · HIFA</dd></div>
       </dl>
       <div class="hcard-bar">
-        <span>10 WORKS / 08 COURSES / 09 TOOLS</span>
+        <span>11 WORKS / 09 COURSES / 09 TOOLS</span>
         <i class="hatch" aria-hidden="true"></i>
       </div>
     </aside>
@@ -255,8 +255,8 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
     </div>
 
     <div class="stats reveal">
-      <div class="stat"><b>10</b><span>归档作品 / WORKS</span></div>
-      <div class="stat"><b>08</b><span>课程项目 / COURSES</span></div>
+      <div class="stat"><b>11</b><span>归档作品 / WORKS</span></div>
+      <div class="stat"><b>09</b><span>课程项目 / COURSES</span></div>
       <div class="stat"><b>09</b><span>工具与设备 / TOOLS</span></div>
       <div class="stat"><b>04</b><span>创作方向 / FIELDS</span></div>
     </div>
@@ -272,9 +272,9 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
     </header>
 
     <div class="filters" id="filters" role="group" aria-label="作品分类筛选">
-      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">全部 <em>ALL</em><i>10</i></button>
+      <button class="filter is-on" type="button" data-filter="all" aria-pressed="true">全部 <em>ALL</em><i>11</i></button>
       <button class="filter" type="button" data-filter="interface" aria-pressed="false">界面交互 <em>UI</em><i>3</i></button>
-      <button class="filter" type="button" data-filter="dataviz" aria-pressed="false">数据可视化 <em>DATA</em><i>2</i></button>
+      <button class="filter" type="button" data-filter="dataviz" aria-pressed="false">数据可视化 <em>DATA</em><i>3</i></button>
       <button class="filter" type="button" data-filter="visual" aria-pressed="false">视觉系统 <em>VISUAL</em><i>2</i></button>
       <button class="filter" type="button" data-filter="space" aria-pressed="false">空间叙事 <em>SPACE</em><i>3</i></button>
     </div>
@@ -346,6 +346,7 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
     </header>
 
     <ol class="log">
+      <li class="reveal"><span class="log-year">2025</span><div class="log-body"><h3>《江城寻味》· 空间信息应用</h3><p>用 Mapbox GL JS 建立武汉美食图层与真实坐标数据，完成 2D/3D 双态地图、分类导航与路线动画。</p></div><span class="log-tag">课程</span></li>
       <li class="reveal">
         <span class="log-year">2026</span>
         <div class="log-body"><h3>联合工作营 · 《心跳回响》《秋林拾光》</h3><p>完成情绪识别交互装置与湖畔场景设计两组联合作品，从概念、搭建到展陈叙述全程参与。</p></div>
@@ -468,10 +469,14 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
         <p class="m-desc" id="mDesc">—</p>
         <dl class="m-spec" id="mSpec"></dl>
       </div>
+      <div class="m-embed" id="mEmbed" hidden>
+        <div class="m-embed-bar"><span>INTERACTIVE MAP / 交互网页</span><a id="mEmbedOpen" href="#" target="_blank" rel="noopener">新窗口打开 ↗</a></div>
+        <iframe id="mFrame" title="江城寻味 · 武汉美食地图（交互网页）" loading="lazy" allow="fullscreen"></iframe>
+      </div>
     </div>
     <footer class="modal-foot">
       <button class="m-nav" type="button" data-step="-1">← 上一份</button>
-      <span class="m-count" id="mCount">01 / 10</span>
+      <span class="m-count" id="mCount">01 / 11</span>
       <button class="m-nav" type="button" data-step="1">下一份 →</button>
     </footer>
   </div>
@@ -491,6 +496,7 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
 <script src="js/main.js"></script>
 </body>
 </html>
+
 
 
 

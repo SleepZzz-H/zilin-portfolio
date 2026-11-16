@@ -237,6 +237,29 @@ window.WORKS = [
     ],
     video: "assets/media/autumn-lakeside.mp4",
     videoPoster: "assets/media/autumn-video-poster.jpg"
+  },
+  {
+    no: "11",
+    title: "江城寻味 · 武汉美食地图",
+    en: "WUHAN FOOD MAP",
+    cat: "dataviz",
+    catName: "数据可视化",
+    year: "2025",
+    img: "assets/works/w11.jpg",
+    fit: "contain",
+    desc:
+      "基于 Mapbox GL JS 的城市美食地图：把武汉老字号、外地风味、夜市与小吃分成四个图层，用真实经纬度落点，以 2D 圆点与 3D 柱体两套编码表达店铺热度。点开地标看详情，导航可一键定位，双击还能播放逛吃路线。",
+    spec: [
+      ["课程", "空间信息应用"],
+      ["角色", "数据采集 · 地图设计 · 交互开发"],
+      ["工具", "Mapbox GL JS / GeoJSON / Python"],
+      ["数据", "41 家店铺 · 四类图层 · 真实坐标"],
+      ["状态", "课程作业 · 可交互"]
+    ],
+    embed: "assets/map/index.html",
+    gallery: [
+      { src: "assets/media/wuhan-map-01.jpg", cap: "研究展板 / RESEARCH BOARD" }
+    ]
   }
 ];
 

@@ -221,6 +221,17 @@
           mg.hidden = true;
         }
       }
+      var me = document.getElementById('mEmbed');
+      var mf = document.getElementById('mFrame');
+      var mo = document.getElementById('mEmbedOpen');
+      if (w.embed && me && mf) {
+        me.hidden = false;
+        if (mf.getAttribute('src') !== w.embed) mf.src = w.embed;
+        if (mo) mo.href = w.embed;
+      } else if (me) {
+        me.hidden = true;
+        if (mf) mf.src = 'about:blank';
+      }
       mCount.textContent = w.no + ' / ' + String(works.length).padStart(2, '0');
     }
 
@@ -242,6 +253,8 @@
     function close() {
       var mv = document.getElementById('mVideo');
       if (mv) mv.pause();
+      var mf = document.getElementById('mFrame');
+      if (mf) mf.src = 'about:blank';
       el.classList.remove('is-open');
       el.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('is-locked');
