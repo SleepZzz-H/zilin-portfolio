@@ -941,6 +941,49 @@
 .wcard-hit:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
 
 /* ---------- 03 能力 ---------- */
+/* 可交互三维信号核心 */
+.core-panel { margin-bottom: clamp(22px, 3vw, 40px); border: 1px solid var(--line); background: var(--panel); }
+.core-head {
+  display: flex; justify-content: space-between; gap: 10px;
+  padding: 9px 12px; border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+  color: var(--ink-mute);
+}
+.core-stage {
+  position: relative; height: clamp(280px, 36vw, 460px);
+  background: radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--signal) 5%, transparent), transparent 62%);
+  overflow: hidden; cursor: grab; touch-action: none;
+}
+.core-stage.is-drag { cursor: grabbing; }
+.core-stage canvas { display: block; width: 100%; height: 100%; }
+.core-tip {
+  position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none;
+  padding: 4px 8px; border: 1px solid var(--signal);
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .1em;
+  white-space: nowrap; opacity: 0;
+  transform: translate(-50%, -160%);
+  transition: opacity .16s;
+}
+.core-tip.is-on { opacity: 1; }
+.core-hud {
+  position: absolute; left: 12px; right: 12px; bottom: 10px; z-index: 2;
+  display: flex; justify-content: space-between; pointer-events: none;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em;
+  color: var(--ink-mute);
+}
+.core-note {
+  margin: 0; padding: 8px 12px; border-top: 1px solid var(--line);
+  font-size: 10px; color: var(--ink-mute);
+}
+.capbar.is-hot .bar-top span, .capbar.is-hot .bar-top b { color: var(--signal); }
+.capbar.is-hot .bar-track i { filter: drop-shadow(0 0 8px var(--signal)); }
+.capbar.is-pulse { animation: corePulse 1s var(--ease); }
+@keyframes corePulse {
+  0%, 100% { background: transparent; }
+  22% { background: color-mix(in srgb, var(--signal) 16%, transparent); }
+}
+
 .cap {
   display: grid; grid-template-columns: minmax(0, 1fr) clamp(230px, 25vw, 330px);
   gap: clamp(24px, 4vw, 64px); align-items: start;

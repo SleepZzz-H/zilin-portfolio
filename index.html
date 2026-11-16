@@ -296,6 +296,16 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
       <span class="sec-meta">// 自评刻度</span>
     </header>
 
+    <div class="core-panel reveal">
+      <div class="core-head"><span>SIGNAL CORE / 信号核心</span><span>DRAG TO ROTATE · 拖拽旋转</span></div>
+      <div class="core-stage" id="coreStage">
+        <canvas id="coreCanvas" aria-label="可拖拽旋转的三维信号核心，六个节点对应六项能力"></canvas>
+        <div class="core-tip" id="coreTip" aria-hidden="true"></div>
+        <div class="core-hud" aria-hidden="true"><span>AXIS 06 / INTERACTIVE</span><span id="coreRead">RX +00.0 / RY +00.0</span></div>
+      </div>
+      <p class="core-note">六个节点对应五项能力与作品档案：拖拽旋转，悬停查看，点击定位。</p>
+    </div>
+
     <div class="cap">
       <div class="cap-bars reveal">
         <div class="capbar"><div class="bar-top"><span>信息可视化 / DATA VIZ</span><b>88</b></div><div class="bar-track"><i style="--v:88%"></i><em class="ticks"></em></div><p>资料整理、编码规则、版面层级；从数据到叙事的完整链路。</p></div>

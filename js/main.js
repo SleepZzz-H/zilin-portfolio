@@ -688,6 +688,219 @@
     }
   })();
 
+  /* ---------- 可交互三维信号核心 ---------- */
+  (function signalCore() {
+    var stage = document.getElementById('coreStage');
+    var canvas = document.getElementById('coreCanvas');
+    var tip = document.getElementById('coreTip');
+    var read = document.getElementById('coreRead');
+    if (!stage || !canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext('2d');
+    var V = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+    var names = [
+      '信息可视化 / DATA VIZ', '视觉与版式 / VISUAL', '交互与生成 / INTERACTIVE',
+      '三维与空间 / SPATIAL', '编程 / CODE', '作品档案 / ARCHIVE'
+    ];
+    var bars = document.querySelectorAll('.capbar');
+    var edges = [];
+    for (var i = 0; i < V.length; i++) {
+      for (var j = i + 1; j < V.length; j++) if ((i ^ 1) !== j) edges.push([i, j]);
+    }
+    var rx = -.42, ry = .62, vx = 0, vy = 0;
+    var dragging = false, moved = 0, lastX = 0, lastY = 0;
+    var hover = -1, raf = null, visible = true, W = 0, H = 0, dpr = 1, R = 0;
+    var pts = [];
+
+    function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+    function rgba(hex, a) {
+      var h = (hex || '#f1f0ea').replace('#', '');
+      if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+      var n = parseInt(h, 16);
+      return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+    }
+    function ink(a) { return rgba(cssVar('--ink'), a); }
+    function signal() { return cssVar('--signal') || '#dff21a'; }
+
+    function resize() {
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = stage.clientWidth; H = stage.clientHeight;
+      R = Math.min(W, H) * .42;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (reduce) draw();
+    }
+
+    function project(v) {
+      var cy = Math.cos(ry), sy = Math.sin(ry);
+      var cx = Math.cos(rx), sx = Math.sin(rx);
+      var x = v[0] * cy - v[2] * sy;
+      var z = v[0] * sy + v[2] * cy;
+      var y = v[1] * cx - z * sx;
+      z = v[1] * sx + z * cx;
+      var s = 3.4 / (3.4 + z);
+      return { x: W / 2 + x * s * R, y: H / 2 + y * s * R, z: z, s: s };
+    }
+
+    function draw() {
+      if (!W || !H) return;
+      ctx.clearRect(0, 0, W, H);
+      pts = V.map(project);
+      ctx.lineWidth = 1;
+      ctx.save();
+      ctx.setLineDash([2, 5]);
+      ctx.strokeStyle = ink(.16);
+      [[0, 1], [2, 3], [4, 5]].forEach(function (e) {
+        ctx.beginPath(); ctx.moveTo(pts[e[0]].x, pts[e[0]].y); ctx.lineTo(pts[e[1]].x, pts[e[1]].y); ctx.stroke();
+      });
+      ctx.restore();
+
+      // 轨道参考线
+      ctx.strokeStyle = ink(.1);
+      ctx.beginPath(); ctx.ellipse(W / 2, H / 2, R * 1.18, R * .38, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(W / 2, H / 2, R * .38, R * 1.18, 0, 0, Math.PI * 2); ctx.stroke();
+
+      // 内层小八面体，制造纵深
+      var inner = V.map(function (v) { return project([v[0] * .46, v[1] * .46, v[2] * .46]); });
+      edges.forEach(function (e) {
+        var a = inner[e[0]], b = inner[e[1]];
+        ctx.strokeStyle = ink(.24);
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      });
+
+      // 半透明三角面：让线框读起来像一个实体核心
+      var F = [[0, 2, 4], [2, 1, 4], [1, 3, 4], [3, 0, 4], [2, 0, 5], [1, 2, 5], [3, 1, 5], [0, 3, 5]];
+      F.forEach(function (f) {
+        var dep = (pts[f[0]].z + pts[f[1]].z + pts[f[2]].z) / 3;
+        ctx.fillStyle = f.indexOf(hover) >= 0 ? rgba(signal(), .3) : ink(.14 + .12 * (dep + 1) / 2);
+        ctx.beginPath();
+        ctx.moveTo(pts[f[0]].x, pts[f[0]].y);
+        ctx.lineTo(pts[f[1]].x, pts[f[1]].y);
+        ctx.lineTo(pts[f[2]].x, pts[f[2]].y);
+        ctx.closePath(); ctx.fill();
+      });
+
+      edges.forEach(function (e) {
+        var a = pts[e[0]], b = pts[e[1]];
+        var hotEdge = e[0] === hover || e[1] === hover;
+        ctx.strokeStyle = hotEdge ? rgba(signal(), .95) : ink(.55 + .4 * ((a.z + b.z) / 2 + 1) / 2);
+        ctx.lineWidth = hotEdge ? 2.6 : 2;
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      });
+      pts.forEach(function (p, i) {
+        var hot = i === hover;
+        var r = Math.max(2.5, (hot ? 7.5 : 4.6) * p.s);
+        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = hot ? signal() : ink(.85); ctx.fill();
+        if (hot) {
+          ctx.strokeStyle = signal();
+          ctx.beginPath(); ctx.arc(p.x, p.y, 13 * p.s, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.font = '10px ui-monospace, monospace';
+        ctx.fillStyle = ink(.62);
+        ctx.fillText(String(i + 1).padStart(2, '0'), p.x + 9 * p.s, p.y - 8 * p.s);
+      });
+      if (read) read.textContent = 'RX ' + (rx * 57.3).toFixed(1).padStart(5, ' ') + ' / RY ' + (ry * 57.3).toFixed(1).padStart(5, ' ');
+      if (hover >= 0 && tip && tip.classList.contains('is-on')) {
+        tip.style.left = pts[hover].x + 'px';
+        tip.style.top = pts[hover].y + 'px';
+      }
+    }
+
+    function loop() {
+      if (!visible) { raf = null; return; }
+      if (!dragging) {
+        ry += .004 + vy;
+        rx = Math.max(-1.2, Math.min(1.2, rx + vx * .4));
+        vy *= .94; vx *= .94;
+      }
+      draw();
+      raf = requestAnimationFrame(loop);
+    }
+
+    function setHover(i, hx, hy) {
+      if (i !== hover) {
+        Array.prototype.forEach.call(bars, function (b) { b.classList.remove('is-hot'); });
+        if (i >= 0 && i < bars.length) bars[i].classList.add('is-hot');
+        hover = i;
+      }
+      if (!tip) return;
+      if (i >= 0) {
+        tip.textContent = String(i + 1).padStart(2, '0') + ' / ' + names[i];
+        tip.style.left = (hx == null ? pts[i].x : hx) + 'px';
+        tip.style.top = (hy == null ? pts[i].y : hy) + 'px';
+        tip.classList.add('is-on');
+      } else {
+        tip.classList.remove('is-on');
+      }
+      if (reduce) draw();
+    }
+
+    function activate(i) {
+      if (i >= bars.length) {
+        var w = document.getElementById('works');
+        if (w) w.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+        return;
+      }
+      var b = bars[i];
+      b.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+      b.classList.remove('is-pulse');
+      void b.offsetWidth;
+      b.classList.add('is-pulse');
+    }
+
+    stage.addEventListener('pointerdown', function (e) {
+      dragging = true; moved = 0;
+      lastX = e.clientX; lastY = e.clientY;
+      stage.classList.add('is-drag');
+      if (stage.setPointerCapture) stage.setPointerCapture(e.pointerId);
+    });
+    stage.addEventListener('pointermove', function (e) {
+      var r = stage.getBoundingClientRect();
+      if (dragging) {
+        var dx = e.clientX - lastX, dy = e.clientY - lastY;
+        lastX = e.clientX; lastY = e.clientY;
+        moved += Math.abs(dx) + Math.abs(dy);
+        vy = dx * .006; vx = dy * .006;
+        ry += vy;
+        rx = Math.max(-1.2, Math.min(1.2, rx + vx * .4));
+        setHover(-1);
+      } else {
+        var hx = e.clientX - r.left, hy = e.clientY - r.top;
+        var best = -1, bd = 20;
+        pts.forEach(function (p, i) {
+          var d = Math.sqrt((p.x - hx) * (p.x - hx) + (p.y - hy) * (p.y - hy));
+          if (d < bd) { bd = d; best = i; }
+        });
+        setHover(best, hx, hy);
+      }
+      if (reduce) draw();
+    });
+    stage.addEventListener('pointerup', function () {
+      if (!dragging) return;
+      dragging = false;
+      stage.classList.remove('is-drag');
+      if (moved < 8 && hover >= 0) activate(hover);
+    });
+    stage.addEventListener('pointerleave', function () { if (!dragging) setHover(-1); });
+    window.addEventListener('resize', resize);
+
+    resize();
+    if (reduce) { draw(); }
+    else {
+      loop();
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (en) {
+          visible = en[0].isIntersecting;
+          if (!visible && raf) { cancelAnimationFrame(raf); raf = null; }
+          if (visible && !raf) loop();
+        }, { threshold: .02 });
+        io.observe(stage);
+      }
+    }
+  })();
+
   /* ---------- 图片放大预览 ---------- */
   (function lightbox() {
     var el = document.getElementById('lightbox');
