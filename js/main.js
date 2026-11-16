@@ -178,8 +178,13 @@
     var openBtn = document.getElementById('focusOpen');
     var rail = document.getElementById('focusRail');
     var hint = document.getElementById('viewHint');
-    if (!sw || !grid || !stage || !rail) return;
+    var wrap = document.getElementById('stairWrap');
+    var scene = document.getElementById('stairScene');
+    var stageEl = document.getElementById('stairStage');
+    var stairCount = document.getElementById('stairCount');
+    if (!sw || !grid || !stage || !rail || !wrap || !scene) return;
     var mode = 'grid', active = null, dragging = false, lastX = 0, lastScroll = 0;
+    var stairCards = [], stairRaf = null, stairActive = 0;
 
     function renderFocus() {
       var items = visibleWorks();
@@ -200,20 +205,72 @@
       }).join('');
     }
 
+    function stairGeometry() {
+      var top = wrap.getBoundingClientRect().top + window.scrollY;
+      var total = wrap.offsetHeight - stageEl.offsetHeight;
+      return { top: top, total: total };
+    }
+
+    function buildStair() {
+      var items = visibleWorks();
+      scene.innerHTML = items.map(function (w) {
+        return '<button type="button" class="stair-card" data-open="' + w.no + '">' +
+          '<img src="' + w.img + '" alt="' + w.title + '" loading="lazy" />' +
+          '<figcaption><i>' + w.no + '</i><b>' + w.title + '</b></figcaption></button>';
+      }).join('');
+      stairCards = Array.prototype.slice.call(scene.children);
+      wrap.style.height = (items.length * 48 + 20) + 'vh';
+      paintStair();
+    }
+
+    function paintStair() {
+      if (!stairCards.length) return;
+      var g = stairGeometry();
+      var p = g.total > 0 ? Math.max(0, Math.min(1, (window.scrollY - g.top) / g.total)) : 0;
+      var focus = p * (stairCards.length - 1);
+      var act = Math.round(focus);
+      stairActive = act;
+      stairCards.forEach(function (card, i) {
+        var dd = i - focus;
+        var angle = dd * .62;
+        var X = Math.sin(angle) * 380 + dd * 40;
+        var Y = -dd * 84 + 30;
+        var Z = (Math.cos(angle) - 1) * 320;
+        var s = Math.max(.42, 1 - Math.abs(dd) * .13);
+        var op = Math.max(0, 1 - Math.abs(dd) * .3);
+        card.style.transform = 'translate3d(calc(-50% + ' + X.toFixed(1) + 'px), calc(-50% + ' + Y.toFixed(1) +
+          'px), ' + Z.toFixed(1) + 'px) rotateY(' + (-angle * 38).toFixed(1) + 'deg) rotateZ(' +
+          (dd * 4).toFixed(1) + 'deg) scale(' + s.toFixed(2) + ')';
+        card.style.opacity = op.toFixed(2);
+        card.style.zIndex = String(100 - Math.round(Math.abs(dd) * 10));
+        card.style.pointerEvents = Math.abs(dd) > 2.4 ? 'none' : 'auto';
+        card.classList.toggle('is-active', i === act);
+      });
+      if (stairCount) stairCount.textContent = 'STEP ' + String(act + 1).padStart(2, '0') + ' / ' + String(stairCards.length).padStart(2, '0');
+    }
+
+    function onStairScroll() {
+      if (mode !== 'stair' || stairRaf) return;
+      stairRaf = requestAnimationFrame(function () { stairRaf = null; paintStair(); });
+    }
+
     function setMode(m) {
       mode = m;
       grid.classList.toggle('is-flow', m === 'flow');
-      grid.hidden = m === 'focus';
+      grid.hidden = m === 'focus' || m === 'stair';
       stage.hidden = m !== 'focus';
+      wrap.hidden = m !== 'stair';
       Array.prototype.forEach.call(sw.querySelectorAll('button'), function (b) {
         var on = b.dataset.view === m;
         b.classList.toggle('is-on', on);
         b.setAttribute('aria-pressed', String(on));
       });
-      hint.textContent = m === 'flow' ? '左右拖拽浏览 · 点击进入档案'
+      hint.textContent = m === 'stair' ? '滚动滚轮 · 作品沿阶梯旋转出现'
+        : m === 'flow' ? '左右拖拽浏览 · 点击进入档案'
         : m === 'focus' ? '← → 切换作品 · 点击查看完整档案' : '悬停查看 · 点击进入档案';
       if (m === 'focus') renderFocus();
       else if (m === 'flow') grid.scrollLeft = 0;
+      else if (m === 'stair') buildStair();
     }
 
     sw.addEventListener('click', function (e) {
@@ -225,9 +282,19 @@
       if (b) { active = b.dataset.focusNo; renderFocus(); }
     });
     document.addEventListener('keydown', function (e) {
-      if (mode !== 'focus') return;
       var lb = document.getElementById('lightbox');
       if (lb && lb.classList.contains('is-open')) return;
+      if (mode === 'stair' && (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowLeft')) {
+        e.preventDefault();
+        var g = stairGeometry();
+        var n = stairCards.length;
+        if (!n || !g.total) return;
+        var next = stairActive + (e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : -1);
+        next = Math.max(0, Math.min(n - 1, next));
+        window.scrollTo({ top: g.top + (next / (n - 1)) * g.total, behavior: reduce ? 'auto' : 'smooth' });
+        return;
+      }
+      if (mode !== 'focus') return;
       var items = visibleWorks();
       var i = -1;
       items.forEach(function (x, k) { if (x.no === active) i = k; });
@@ -236,8 +303,13 @@
       if (e.key === 'ArrowLeft') { active = items[(i - 1 + items.length) % items.length].no; renderFocus(); }
     });
     filterBtns.forEach(function (b) {
-      b.addEventListener('click', function () { if (mode === 'focus') setTimeout(renderFocus, 0); });
+      b.addEventListener('click', function () {
+        if (mode === 'focus') setTimeout(renderFocus, 0);
+        if (mode === 'stair') setTimeout(buildStair, 0);
+      });
     });
+    window.addEventListener('scroll', onStairScroll, { passive: true });
+    window.addEventListener('resize', function () { if (mode === 'stair') paintStair(); });
 
     grid.addEventListener('pointerdown', function (e) {
       if (mode !== 'flow' || e.button !== 0) return;

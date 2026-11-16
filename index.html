@@ -285,6 +285,7 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
         <button type="button" data-view="grid" class="is-on" aria-pressed="true">▦ 网格 GRID</button>
         <button type="button" data-view="focus" aria-pressed="false">▣ 聚焦 FOCUS</button>
         <button type="button" data-view="flow" aria-pressed="false">▤ 长廊 FLOW</button>
+        <button type="button" data-view="stair" aria-pressed="false">▥ 阶梯 STAIR</button>
       </div>
       <span class="view-hint" id="viewHint">悬停查看 · 点击进入档案</span>
     </div>
@@ -301,6 +302,14 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
         </div>
       </div>
       <div class="focus-rail" id="focusRail" role="group" aria-label="切换聚焦作品"></div>
+    </div>
+
+    <div class="stair-wrap" id="stairWrap" hidden>
+      <div class="stair-stage" id="stairStage">
+        <div class="stair-head"><span>STAIRCASE / 阶梯档案</span><span id="stairCount">STEP 01 / 11</span></div>
+        <div class="stair-scene" id="stairScene"></div>
+        <div class="stair-hint">滚动滚轮 · 作品沿阶梯旋转出现</div>
+      </div>
     </div>
 
     <div class="wgrid" id="workGrid"></div>

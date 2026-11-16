@@ -900,6 +900,53 @@
   background: var(--soot); color: var(--on-soot);
 }
 
+/* 滚动驱动的阶梯旋转展示 */
+.stair-wrap[hidden] { display: none; }
+.stair-wrap { position: relative; margin-top: clamp(14px, 2vw, 24px); }
+.stair-stage {
+  position: sticky; top: var(--bar);
+  height: calc(100svh - var(--bar)); min-height: 520px;
+  border: 1px solid var(--line-2); overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--signal) 6%, transparent), transparent 62%), var(--panel);
+  perspective: 1300px;
+}
+.stair-head, .stair-hint {
+  position: absolute; left: 16px; right: 16px; z-index: 8;
+  display: flex; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+  color: var(--ink-mute); pointer-events: none;
+}
+.stair-head { top: 14px; }
+.stair-hint { bottom: 14px; justify-content: center; }
+.stair-scene { position: absolute; inset: 0; transform-style: preserve-3d; }
+.stair-card {
+  position: absolute; left: 50%; top: 50%;
+  width: min(400px, 46vw); padding: 0;
+  border: 1px solid var(--line); background: var(--panel);
+  transform-origin: center center; will-change: transform, opacity;
+  cursor: pointer; text-align: left; color: var(--ink);
+}
+.stair-card.is-active { border-color: var(--signal); box-shadow: 0 0 28px color-mix(in srgb, var(--signal) 22%, transparent); }
+.stair-card img {
+  display: block; width: 100%; height: clamp(150px, 24vh, 240px);
+  object-fit: cover; filter: grayscale(1) brightness(.8);
+  transition: filter var(--dur-l) var(--ease);
+}
+.stair-card.is-active img { filter: grayscale(0) brightness(1); }
+.stair-card figcaption {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 8px 10px; border-top: 1px solid var(--line);
+}
+.stair-card figcaption i {
+  font-family: var(--font-mono); font-size: 9px; font-style: normal;
+  color: var(--signal);
+}
+.stair-card figcaption b { font-size: 12px; letter-spacing: .02em; }
+@media (max-width: 719px) {
+  .stair-card { width: 66vw; }
+  .stair-hint { font-size: 8px; }
+}
+
 .wgrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
