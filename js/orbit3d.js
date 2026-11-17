@@ -92,9 +92,9 @@ import { createFluid } from './fluid.js';
     composer.addPass(new RenderPass(scene, camera));
     bloom = new UnrealBloomPass(
       new THREE.Vector2(stage.clientWidth, stage.clientHeight),
-      stage.clientWidth < 720 ? .3 : .44,
+      stage.clientWidth < 720 ? .26 : .36,
       .5,
-      .8
+      .85
     );
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
@@ -238,6 +238,39 @@ import { createFluid } from './fluid.js';
   var planeGeo = new THREE.PlaneGeometry(PW, PH, 1, 1);
   var boxGeo = new THREE.BoxGeometry(PW, PH, .12);
   var edgeGeo = new THREE.EdgesGeometry(boxGeo);
+  var glowGeo = new THREE.PlaneGeometry(PW * 1.38, PH * 1.38, 1, 1);
+  var streakGeo = new THREE.PlaneGeometry(PW * 2.8, .12, 1, 1);
+
+  // 发光壳层：卡片背后的柔和光晕，参考 fresnel 边缘光的叠色方式
+  var glowVert = [
+    'varying vec2 vUv;',
+    'void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }'
+  ].join('\n');
+  var glowFrag = [
+    'precision highp float;',
+    'uniform vec3 uColor;',
+    'uniform float uPower;',
+    'varying vec2 vUv;',
+    'void main(){',
+    '  vec2 p = abs(vUv - 0.5) * 2.0;',
+    '  float d = length(max(p - 0.62, 0.0)) - 0.06;',
+    '  float a = exp(-max(d, 0.0) * 8.5);',
+    '  a *= smoothstep(1.0, 0.84, max(p.x, p.y));',
+    '  gl_FragColor = vec4(uColor, a * uPower);',
+    '}'
+  ].join('\n');
+  var streakFrag = [
+    'precision highp float;',
+    'uniform vec3 uColor;',
+    'uniform float uPower;',
+    'varying vec2 vUv;',
+    'void main(){',
+    '  float x = abs(vUv.x - 0.5) * 2.0;',
+    '  float y = abs(vUv.y - 0.5) * 2.0;',
+    '  float a = pow(max(0.0, 1.0 - x), 2.2) * pow(max(0.0, 1.0 - y), 5.0);',
+    '  gl_FragColor = vec4(uColor, a * uPower);',
+    '}'
+  ].join('\n');
 
   function makeCard(w) {
     var card = new THREE.Group();
@@ -276,9 +309,34 @@ import { createFluid } from './fluid.js';
     edges.position.z = -.06;
     card.add(edges);
 
+    var glowMat = new THREE.ShaderMaterial({
+      uniforms: { uColor: { value: baseColor.clone() }, uPower: { value: 0 } },
+      vertexShader: glowVert,
+      fragmentShader: glowFrag,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    var glow = new THREE.Mesh(glowGeo, glowMat);
+    glow.position.z = -.14;
+    card.add(glow);
+
+    var streakMat = new THREE.ShaderMaterial({
+      uniforms: { uColor: { value: baseColor.clone() }, uPower: { value: 0 } },
+      vertexShader: glowVert,
+      fragmentShader: streakFrag,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    var streak = new THREE.Mesh(streakGeo, streakMat);
+    streak.position.z = -.22;
+    card.add(streak);
+
     card.userData = {
       work: w, hover: 0, active: 0, base: null,
-      fm: material, front: front, edges: edges, box: box
+      fm: material, front: front, edges: edges, box: box,
+      glow: glowMat, streak: streakMat
     };
 
     new THREE.TextureLoader().load(w.img, function (tex) {
@@ -329,6 +387,8 @@ import { createFluid } from './fluid.js';
     }
     if (ud.box && ud.box.material) ud.box.material.dispose();
     if (ud.edges && ud.edges.material) ud.edges.material.dispose();
+    if (ud.glow) ud.glow.dispose();
+    if (ud.streak) ud.streak.dispose();
   }
 
   function build(list) {
@@ -441,6 +501,14 @@ import { createFluid } from './fluid.js';
         c.userData.edges.material.color.copy(baseColor);
         c.userData.edges.material.opacity = .18 + c.userData.active * .5 + c.userData.hover * .25;
       }
+      if (c.userData.glow) {
+        c.userData.glow.uniforms.uColor.value.copy(baseColor);
+        c.userData.glow.uniforms.uPower.value = .01 + c.userData.active * .09 + c.userData.hover * .06;
+      }
+      if (c.userData.streak) {
+        c.userData.streak.uniforms.uColor.value.copy(baseColor);
+        c.userData.streak.uniforms.uPower.value = c.userData.active * .07 + c.userData.hover * .05;
+      }
       var a = dist === 0 ? 0 : (i - focus) * STEP;
       c.position.x = Math.sin(a) * RADIUS;
       c.position.z = Math.cos(a) * RADIUS - RADIUS + c.userData.hover * .2;
@@ -516,6 +584,9 @@ import { createFluid } from './fluid.js';
   }, { passive: true });
   if (inView()) start();
 })();
+
+
+
 
 
 
