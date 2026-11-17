@@ -26,7 +26,7 @@ try {
   var s = localStorage.getItem('efl-signal');
   if (s) document.documentElement.dataset.signal = s;
 } catch (e) {}
-setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 1600);
+setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 4800);
 </script>
 <noscript><style>.boot{display:none}.reveal{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>
 </head>
@@ -50,6 +50,7 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
     <div class="boot-track"><i></i></div>
     <p class="boot-s"><span data-boot>READING OPERATOR ID</span><b>00%</b></p>
   </div>
+  <span class="boot-skip">CLICK TO SKIP / 点击跳过</span>
 </div>
 
 <!-- 滚动进度 -->

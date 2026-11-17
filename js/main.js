@@ -19,30 +19,51 @@
     var bar = el.querySelector('.boot-track i');
     var pct = el.querySelector('.boot-s b');
     var txt = el.querySelector('[data-boot]');
-    var msgs = ['READING OPERATOR ID', 'DECODING ZILIN HUANG', 'ASSEMBLING ARCHIVE', 'READY / LINDEN'];
+    var msgs = [
+      'READING OPERATOR ID',
+      'DECODING ZILIN HUANG',
+      'MAPPING ARCHIVE INDEX',
+      'CALIBRATING SIGNAL CORE',
+      'ASSEMBLING VISUAL FIELD',
+      'READY / LINDEN'
+    ];
+    var finished = false;
 
     function done() {
+      if (finished) return;
+      finished = true;
       el.classList.add('is-done');
       d.classList.add('is-ready');
       el.setAttribute('aria-hidden', 'true');
-      setTimeout(function () { el.style.display = 'none'; }, 700);
+      setTimeout(function () { el.style.display = 'none'; }, 900);
     }
     if (reduce) {
-      bar.style.width = '100%'; pct.textContent = '100%'; txt.textContent = msgs[3];
+      bar.style.width = '100%'; pct.textContent = '100%'; txt.textContent = msgs[5];
       setTimeout(done, 100);
       return;
     }
     var p = 0;
     var timer = setInterval(function () {
-      p = Math.min(100, p + Math.random() * 10 + 5);
+      p = Math.min(100, p + Math.random() * 4.2 + 2.2);
       bar.style.width = p + '%';
       pct.textContent = String(Math.floor(p)).padStart(3, '0') + '%';
-      txt.textContent = msgs[Math.min(3, Math.floor(p / 26))];
-      if (p >= 100) { clearInterval(timer); setTimeout(done, 200); }
-    }, 100);
+      txt.textContent = msgs[Math.min(msgs.length - 1, Math.floor(p / 17))];
+      if (p >= 100) { clearInterval(timer); setTimeout(done, 420); }
+    }, 140);
+    // 点击或按键可以跳过开场
+    function skip() {
+      clearInterval(timer);
+      setTimeout(done, 60);
+      document.removeEventListener('pointerdown', skip);
+      document.removeEventListener('keydown', skip);
+    }
+    setTimeout(function () {
+      document.addEventListener('pointerdown', skip);
+      document.addEventListener('keydown', skip);
+    }, 600);
   })();
   // 兜底：即便启动屏被跳过，首屏也要落位
-  setTimeout(function () { d.classList.add('is-ready'); }, 1800);
+  setTimeout(function () { d.classList.add('is-ready'); }, 4800);
 
   /* ---------- 顶栏时钟 ---------- */
   (function clock() {

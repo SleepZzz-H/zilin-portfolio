@@ -8,7 +8,7 @@
 .boot {
   position: fixed; inset: 0; z-index: 200;
   background: #0e0f0b; color: #f1f0ea;
-  transition: opacity .55s var(--ease), visibility .55s, transform .55s var(--ease);
+  transition: opacity .9s var(--ease), visibility .9s, transform .9s var(--ease);
 }
 .boot.is-done { opacity: 0; visibility: hidden; transform: scale(1.06); }
 .boot-grid {
@@ -30,6 +30,16 @@
 }
 .boot-head { top: 26px; display: flex; justify-content: space-between; }
 .boot-foot { bottom: 28px; }
+.boot-skip {
+  position: absolute; right: 32px; bottom: 86px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .2em;
+  color: #8b8d80; pointer-events: none;
+  animation: skipPulse 2.2s ease-in-out infinite;
+}
+@keyframes skipPulse { 50% { opacity: .3; } }
+@media (max-width: 719px) {
+  .boot-skip { right: 16px; bottom: 96px; font-size: 8px; }
+}
 .boot-core {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   width: min(1120px, 90vw); text-align: center;
