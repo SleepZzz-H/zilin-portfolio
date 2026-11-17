@@ -8,8 +8,8 @@
 <meta name="theme-color" content="#15160f" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 21 7v10l-9 5-9-5V7z' fill='none' stroke='%23e2f21a' stroke-width='1.6'/%3E%3Cpath d='M12 7.4 16.4 12 12 16.6 7.6 12z' fill='%23e2f21a'/%3E%3C/svg%3E" />
 <link rel="preload" href="assets/works/portrait.jpg" as="image" />
-<link rel="stylesheet" href="css/theme.css?v=14" />
-<link rel="stylesheet" href="css/style.css?v=14" />
+<link rel="stylesheet" href="css/theme.css?v=15" />
+<link rel="stylesheet" href="css/style.css?v=15" />
 <script type="importmap">
 {
   "imports": {
@@ -31,6 +31,13 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
 <noscript><style>.boot{display:none}.reveal{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>
 </head>
 <body>
+<script>
+if (new URLSearchParams(location.search).get('immersive') === '1') {
+  document.documentElement.classList.add('immersive');
+}
+</script>
+<a class="immersive-exit" href="index.html">← EXIT / 返回档案</a>
+<div class="immersive-head" aria-hidden="true"><span>HUANG ZILIN — SELECTED WORKS</span><span>11 WORKS / 2024—2026</span></div>
 
 <!-- ============ 启动屏 ============ -->
 <div class="boot" id="boot" aria-hidden="true">
@@ -155,8 +162,8 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
       </p>
 
       <div class="hero-btns">
-        <a class="btn btn-solid" href="#works"><span>进入档案库</span><i class="btn-ico">▶</i></a>
-        <a class="btn btn-line" href="#link"><span>建立联络</span><i class="btn-ico">↗</i></a>
+        <a class="btn btn-solid" href="?immersive=1"><span>沉浸浏览</span><i class="btn-ico">◈</i></a>
+        <a class="btn btn-line" href="#works"><span>档案库</span><i class="btn-ico">▶</i></a>
       </div>
 
       <dl class="hero-meta">
@@ -309,6 +316,7 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
           </ul>
           <span class="orbit-idx" id="orbitIndex">01 / 11</span>
           <button type="button" class="orbit-enter" id="orbitEnter">SEARCH THE ARCHIVE ↗</button>
+          <a class="orbit-full" href="?immersive=1">FULLSCREEN / 全屏沉浸 ⛶</a>
         </aside>
 
         <div class="orbit-top"><a href="#works">ARCHIVE</a><a href="#link">ABOUT</a></div>
@@ -527,11 +535,12 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
   <span class="lb-cap" id="lbCap"></span>
 </div>
 
-<script src="js/data.js?v=14"></script>
-<script src="js/main.js?v=14"></script>
-<script type="module" src="js/orbit3d.js?v=14"></script>
+<script src="js/data.js?v=15"></script>
+<script src="js/main.js?v=15"></script>
+<script type="module" src="js/orbit3d.js?v=15"></script>
 </body>
 </html>
+
 
 
 

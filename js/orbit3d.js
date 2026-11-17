@@ -21,6 +21,7 @@ import { createFluid } from './fluid.js';
   var capS = document.querySelector('#glCaption span');
   if (!wrap || !stage || !canvas || !track) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (document.documentElement.classList.contains('immersive') && window.innerWidth < 760) return;
 
   var renderer;
   try {
@@ -524,7 +525,7 @@ import { createFluid } from './fluid.js';
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    camera.position.z = camera.aspect < .95 ? 13.2 : 9.2;
+    camera.position.z = window.innerWidth < 760 ? 13.2 : 9.2;
     camera.updateProjectionMatrix();
     if (composer) composer.setSize(w, h);
     if (bloom) bloom.setSize(w, h);
@@ -690,6 +691,10 @@ import { createFluid } from './fluid.js';
   });
 
   window.addEventListener('resize', resize);
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(function () { resize(); }).observe(stage);
+  }
+  setTimeout(resize, 300);
   document.addEventListener('orbit:rebuild', function (e) { build(e.detail); });
 
   var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (en) {
@@ -711,6 +716,7 @@ import { createFluid } from './fluid.js';
   }, { passive: true });
   if (inView()) start();
 })();
+
 
 
 

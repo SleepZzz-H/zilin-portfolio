@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    endfield-portfolio · main.js
    ============================================================ */
 (function () {
@@ -453,7 +453,7 @@
         var ad = Math.abs(d);
         var angle = d * .62;
         var R = 700;
-        var X = Math.sin(angle) * R + 60;
+        var X = Math.sin(angle) * R + (window.innerWidth < 760 ? 0 : 60);
         var Z = (Math.cos(angle) - 1) * R;
         var Y = -d * 30;
         var rot = -angle * 57.2958;
@@ -1438,3 +1438,4 @@
     }, { passive: true });
   })();
 })();
+

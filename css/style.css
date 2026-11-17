@@ -38,6 +38,63 @@
 }
 @keyframes skipPulse { 50% { opacity: .3; } }
 
+/* ---------- 沉浸模式：只剩三维作品场景 ---------- */
+.immersive-exit, .immersive-head { display: none; }
+html.immersive body { background: #07080b; }
+html.immersive .bar,
+html.immersive .rail,
+html.immersive .hero,
+html.immersive .ticker,
+html.immersive #manifest,
+html.immersive #capability,
+html.immersive #log,
+html.immersive #link,
+html.immersive .foot,
+html.immersive .coord-hud,
+html.immersive .crt { display: none !important; }
+html.immersive #works {
+  padding: 0; margin: 0; border: 0;
+}
+html.immersive #works .sec-head,
+html.immersive #works .filters,
+html.immersive #works .view-bar,
+html.immersive #works .sec-foot { display: none !important; }
+html.immersive .orbit-wrap { margin: 0; }
+html.immersive .orbit-wrap::before,
+html.immersive .orbit-wrap::after { display: none; }
+html.immersive .orbit-stage {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100svh; min-height: 0;
+  border: 0; z-index: 2;
+}
+html.immersive .orbit-top { display: none; }
+html.immersive .orbit-panel {
+  left: clamp(18px, 2.2vw, 34px); bottom: 64px;
+}
+html.immersive .gl-caption { bottom: 38px; }
+html.immersive .immersive-exit {
+  display: flex; align-items: center;
+  position: fixed; left: clamp(18px, 2.2vw, 34px); top: 20px; z-index: 130;
+  padding: 7px 11px; border: 1px solid rgba(241, 240, 234, .28);
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+  color: rgba(241, 240, 234, .8);
+  background: rgba(8, 9, 11, .45); backdrop-filter: blur(8px);
+  transition: background var(--dur), color var(--dur), border-color var(--dur);
+}
+html.immersive .immersive-exit:hover {
+  background: var(--signal); color: var(--on-signal); border-color: var(--signal);
+}
+html.immersive .immersive-head {
+  display: flex; justify-content: space-between; gap: 16px;
+  position: fixed; right: clamp(18px, 2.2vw, 34px); top: 24px; z-index: 130;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: .16em;
+  color: rgba(241, 240, 234, .45); pointer-events: none;
+}
+@media (max-width: 719px) {
+  html.immersive .immersive-head { display: none; }
+  html.immersive .orbit-panel { left: 14px; right: 14px; bottom: 54px; }
+}
+
 /* ---------- 开场四段式：文字 → logo → 左移闪烁 → 信息 ---------- */
 .intro-line {
   min-height: 2.4em;
@@ -999,6 +1056,14 @@
 .view-switch button:hover { color: var(--ink); background: var(--paper-2); }
 .view-switch button.is-on { background: var(--signal); color: var(--on-signal); font-weight: 700; }
 .view-hint { font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; color: var(--ink-mute); }
+.view-immersive {
+  padding: 7px 11px; border: 1px solid var(--line);
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .12em;
+  color: var(--ink-soft); white-space: nowrap;
+  transition: background var(--dur), color var(--dur), border-color var(--dur);
+}
+.view-immersive:hover { background: var(--signal); color: var(--on-signal); border-color: var(--signal); }
+@media (max-width: 719px) { .view-immersive { display: none; } }
 
 .focus-stage[hidden] { display: none; }
 .focus-main {
@@ -1248,6 +1313,15 @@
   transition: background var(--dur), color var(--dur), border-color var(--dur);
 }
 .orbit-enter:hover { background: var(--signal); color: var(--on-signal); border-color: var(--signal); }
+.orbit-full {
+  align-self: flex-start;
+  padding: 5px 0;
+  font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .14em;
+  color: rgba(241, 240, 234, .5);
+  border-bottom: 1px solid rgba(241, 240, 234, .2);
+  transition: color var(--dur), border-color var(--dur);
+}
+.orbit-full:hover { color: var(--signal); border-color: var(--signal); }
 .orbit-top {
   position: absolute; right: clamp(16px, 2.4vw, 30px); top: 18px; z-index: 40;
   display: flex; gap: 16px;
@@ -1874,3 +1948,12 @@ body.is-locked { overflow: hidden; }
   }
 }
 
+
+@media (max-width: 719px) {
+  html.immersive .orbit-panel {
+    top: auto !important;
+    bottom: 54px; left: 14px; right: 14px;
+  }
+  html.immersive .orbit-stage { background: #08090b; }
+  html.immersive .gl-caption { bottom: 28px; }
+}
