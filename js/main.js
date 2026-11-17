@@ -42,14 +42,15 @@
       setTimeout(done, 100);
       return;
     }
-    var p = 0;
+    var DURATION = 4200;
+    var startAt = performance.now();
     var timer = setInterval(function () {
-      p = Math.min(100, p + Math.random() * 4.2 + 2.2);
+      var p = Math.min(100, ((performance.now() - startAt) / DURATION) * 100);
       bar.style.width = p + '%';
       pct.textContent = String(Math.floor(p)).padStart(3, '0') + '%';
       txt.textContent = msgs[Math.min(msgs.length - 1, Math.floor(p / 17))];
-      if (p >= 100) { clearInterval(timer); setTimeout(done, 420); }
-    }, 140);
+      if (p >= 100) { clearInterval(timer); setTimeout(done, 480); }
+    }, 50);
     // 点击或按键可以跳过开场
     function skip() {
       clearInterval(timer);
@@ -63,7 +64,7 @@
     }, 600);
   })();
   // 兜底：即便启动屏被跳过，首屏也要落位
-  setTimeout(function () { d.classList.add('is-ready'); }, 4800);
+  setTimeout(function () { d.classList.add('is-ready'); }, 5200);
 
   /* ---------- 顶栏时钟 ---------- */
   (function clock() {
