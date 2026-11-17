@@ -3,6 +3,7 @@ import { EffectComposer } from '../assets/vendor/addons/postprocessing/EffectCom
 import { RenderPass } from '../assets/vendor/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from '../assets/vendor/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from '../assets/vendor/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from '../assets/vendor/addons/postprocessing/ShaderPass.js';
 import { createFluid } from './fluid.js';
 
 /* ============================================================
@@ -57,7 +58,7 @@ import { createFluid } from './fluid.js';
       uniforms: {
         tFluid: { value: fluid.texture() },
         uColor: { value: readSignal() },
-        uIntensity: { value: 1.1 }
+        uIntensity: { value: .85 }
       },
       vertexShader: [
         'varying vec2 vUv;',
@@ -97,6 +98,33 @@ import { createFluid } from './fluid.js';
       .85
     );
     composer.addPass(bloom);
+
+    // 镜头色散：越靠边缘 R/B 分离越明显
+    var dispersionPass = new ShaderPass({
+      uniforms: {
+        tDiffuse: { value: null },
+        uAmount: { value: stage.clientWidth < 760 ? .0006 : .0012 }
+      },
+      vertexShader: [
+        'varying vec2 vUv;',
+        'void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }'
+      ].join('\n'),
+      fragmentShader: [
+        'precision highp float;',
+        'uniform sampler2D tDiffuse;',
+        'uniform float uAmount;',
+        'varying vec2 vUv;',
+        'void main(){',
+        '  vec2 dir = vUv - 0.5;',
+        '  vec2 off = dir * uAmount * (0.4 + length(dir) * 2.2);',
+        '  float r = texture2D(tDiffuse, vUv + off).r;',
+        '  vec4 g = texture2D(tDiffuse, vUv);',
+        '  float b = texture2D(tDiffuse, vUv - off).b;',
+        '  gl_FragColor = vec4(r, g.g, b, 1.0);',
+        '}'
+      ].join('\n')
+    });
+    composer.addPass(dispersionPass);
     composer.addPass(new OutputPass());
   } catch (e) {
     composer = null;
@@ -189,6 +217,70 @@ import { createFluid } from './fluid.js';
   var dust = new THREE.Points(pGeo, pMat);
   scene.add(dust);
 
+  // 第二层：大颗柔光粒子，负责 Bloom 的光斑层次
+  var haloCount = 55;
+  var hPos = new Float32Array(haloCount * 3);
+  for (var hi = 0; hi < haloCount; hi++) {
+    hPos[hi * 3] = (Math.random() - .5) * 22;
+    hPos[hi * 3 + 1] = (Math.random() - .5) * 13;
+    hPos[hi * 3 + 2] = -11 + Math.random() * 9;
+  }
+  var hGeo = new THREE.BufferGeometry();
+  hGeo.setAttribute('position', new THREE.BufferAttribute(hPos, 3));
+  var haloTexCanvas = document.createElement('canvas');
+  haloTexCanvas.width = haloTexCanvas.height = 64;
+  var hctx = haloTexCanvas.getContext('2d');
+  var hgrad = hctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  hgrad.addColorStop(0, 'rgba(255,255,255,.95)');
+  hgrad.addColorStop(.25, 'rgba(255,255,255,.45)');
+  hgrad.addColorStop(1, 'rgba(255,255,255,0)');
+  hctx.fillStyle = hgrad;
+  hctx.fillRect(0, 0, 64, 64);
+  var haloTex = new THREE.CanvasTexture(haloTexCanvas);
+  var haloMat = new THREE.PointsMaterial({
+    size: .26, map: haloTex, color: baseColor.clone(),
+    transparent: true, opacity: .12, depthWrite: false,
+    blending: THREE.AdditiveBlending, sizeAttenuation: true
+  });
+  var halos = new THREE.Points(hGeo, haloMat);
+  scene.add(halos);
+
+  // 光芒：当前作品背后的放射状 lens flare
+  var flareMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: baseColor.clone() },
+      uPower: { value: .0 },
+      uTime: { value: 0 }
+    },
+    vertexShader: [
+      'varying vec2 vUv;',
+      'void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }'
+    ].join('\n'),
+    fragmentShader: [
+      'precision highp float;',
+      'uniform vec3 uColor;',
+      'uniform float uPower;',
+      'uniform float uTime;',
+      'varying vec2 vUv;',
+      'void main(){',
+      '  vec2 p = vUv - 0.5;',
+      '  float x = abs(p.x) * 2.0;',
+      '  float y = abs(p.y) * 2.0;',
+      '  float streak = exp(-y * 16.0) * exp(-x * 1.6);',
+      '  float core = exp(-length(p) * 12.0);',
+      '  float a = streak * .5 + core * .22;',
+      '  a *= smoothstep(1.0, 0.2, max(x, y));',
+      '  gl_FragColor = vec4(uColor, a * uPower);',
+      '}'
+    ].join('\n'),
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  var flare = new THREE.Mesh(new THREE.PlaneGeometry(17, 3.4), flareMat);
+  flare.position.z = -2.2;
+  scene.add(flare);
+
   var vertexShader = [
     'varying vec2 vUv;',
     'void main(){',
@@ -208,6 +300,10 @@ import { createFluid } from './fluid.js';
     'uniform vec3 uColor;',
     'uniform float uDim;',
     'uniform float uExposure;',
+    'uniform sampler2D tFluid;',
+    'uniform vec2 uResolution;',
+    'uniform float uFluid;',
+    'uniform float uDispersion;',
     'varying vec2 vUv;',
     'void main(){',
     '  vec2 uv = vUv;',
@@ -216,8 +312,15 @@ import { createFluid } from './fluid.js';
     '  } else {',
     '    uv.y = (uv.y - 0.5) * (uImgAspect / uPlaneAspect) + 0.5;',
     '  }',
-    '  vec4 tex = texture2D(tMap, uv);',
-    '  vec3 c = tex.rgb;',
+    '  vec2 suv = gl_FragCoord.xy / uResolution;',
+    '  vec3 fluid = texture2D(tFluid, suv).rgb;',
+    '  uv += (fluid.rg - 0.5) * 0.012 * uFluid;',
+    '  vec2 dir = normalize(vUv - 0.5 + vec2(0.0001));',
+    '  float disp = (0.0008 + 0.0035 * length(vUv - 0.5)) * uDispersion * (0.4 + uHover * 1.4 + uActive * 0.5);',
+    '  float rr = texture2D(tMap, uv + dir * disp).r;',
+    '  vec4 gg = texture2D(tMap, uv);',
+    '  float bb = texture2D(tMap, uv - dir * disp).b;',
+    '  vec3 c = vec3(rr, gg.g, bb);',
     '  float g = dot(c, vec3(0.299, 0.587, 0.114));',
     '  c = mix(vec3(g) * 0.86, c, clamp(uActive * 0.9 + uHover * 0.4, 0.0, 1.0));',
     '  c *= (0.86 + uHover * 0.26 + uActive * 0.14) * uDim * uExposure;',
@@ -289,7 +392,11 @@ import { createFluid } from './fluid.js';
       uMouse: { value: new THREE.Vector2(0, 0) },
       uColor: { value: baseColor.clone() },
       uDim: { value: 1 },
-      uExposure: { value: 1 }
+      uExposure: { value: 1 },
+      tFluid: { value: null },
+      uResolution: { value: new THREE.Vector2(stage.clientWidth, stage.clientHeight) },
+      uFluid: { value: .45 },
+      uDispersion: { value: stage.clientWidth < 760 ? .7 : 1 }
     };
     var material = new THREE.ShaderMaterial({
       uniforms: uniforms,
@@ -422,6 +529,10 @@ import { createFluid } from './fluid.js';
     if (composer) composer.setSize(w, h);
     if (bloom) bloom.setSize(w, h);
     if (pMat) pMat.uniforms.uPixelRatio.value = DPR;
+    cards.forEach(function (c) {
+      var fm = c.userData.fm;
+      if (fm) fm.uniforms.uResolution.value.set(w, h);
+    });
   }
 
   function progress() {
@@ -468,28 +579,27 @@ import { createFluid } from './fluid.js';
     camera.lookAt(0, 0, 0);
 
     pMat.uniforms.uTime.value += .016;
+    flareMat.uniforms.uTime.value += .016;
+    flareMat.uniforms.uColor.value.copy(baseColor);
+    flareMat.uniforms.uPower.value = .05 + (1 - Math.min(1, Math.abs(focus - Math.round(focus)))) * .07;
     pMat.uniforms.uMouse.value.set(pointer.x, pointer.y);
     pMat.uniforms.uColor.value.copy(baseColor);
     pMat.uniforms.uPixelRatio.value = DPR;
+    halos.rotation.y += .0005;
+    haloMat.color.copy(baseColor);
 
     if (fluid) {
       fluid.step(1 / 60);
       fluidMat.uniforms.tFluid.value = fluid.texture();
       fluidMat.uniforms.uColor.value.copy(baseColor);
-      if (performance.now() - lastAuto > 2600) {
-        lastAuto = performance.now();
-        fluid.splat(Math.random(), Math.random(), (Math.random() - .5) * 1400, (Math.random() - .5) * 1400,
-          scratchColor.copy(baseColor).multiplyScalar(.28), .0045);
-      }
     }
-
-    hovered = hitTest();
 
     cards.forEach(function (c, i) {
       var isActive = Math.abs(i - focus) < .5;
       var isHover = c === hovered;
       c.userData.active += ((isActive ? 1 : 0) - c.userData.active) * .1;
       c.userData.hover += ((isHover ? 1 : 0) - c.userData.hover) * .14;
+
       var fm = c.userData.fm;
       fm.uniforms.uActive.value = c.userData.active;
       fm.uniforms.uHover.value = c.userData.hover;
@@ -497,6 +607,11 @@ import { createFluid } from './fluid.js';
       fm.uniforms.uColor.value.copy(baseColor);
       var dist = Math.abs(i - focus);
       fm.uniforms.uDim.value = Math.max(.32, 1 - dist * .16);
+      if (fluid) {
+        fm.uniforms.tFluid.value = fluid.texture();
+        fm.uniforms.uFluid.value = .45;
+      }
+
       if (c.userData.edges) {
         c.userData.edges.material.color.copy(baseColor);
         c.userData.edges.material.opacity = .18 + c.userData.active * .5 + c.userData.hover * .25;
@@ -509,6 +624,7 @@ import { createFluid } from './fluid.js';
         c.userData.streak.uniforms.uColor.value.copy(baseColor);
         c.userData.streak.uniforms.uPower.value = c.userData.active * .07 + c.userData.hover * .05;
       }
+
       var a = dist === 0 ? 0 : (i - focus) * STEP;
       c.position.x = Math.sin(a) * RADIUS;
       c.position.z = Math.cos(a) * RADIUS - RADIUS + c.userData.hover * .2;
@@ -557,6 +673,17 @@ import { createFluid } from './fluid.js';
     updatePointer(e);
     var hit = hitTest();
     if (!hit) return;
+    var idx = cards.indexOf(hit);
+    var act = Math.round(focus);
+    if (idx >= 0 && Math.abs(idx - act) > .45 && cards.length > 1) {
+      var top = wrap.getBoundingClientRect().top + window.scrollY;
+      var total = wrap.offsetHeight - stage.offsetHeight;
+      window.scrollTo({
+        top: top + (idx / (cards.length - 1)) * total,
+        behavior: reduce ? 'auto' : 'smooth'
+      });
+      return;
+    }
     var no = hit.userData.work.no;
     var btn = track.querySelector('[data-open="' + no + '"]');
     if (btn) btn.click();
@@ -584,6 +711,8 @@ import { createFluid } from './fluid.js';
   }, { passive: true });
   if (inView()) start();
 })();
+
+
 
 
 
