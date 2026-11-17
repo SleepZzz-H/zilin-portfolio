@@ -75,6 +75,9 @@
       setProgress(28, 'PHRASE LOCKED');
     });
 
+    // 文字淡出后彻底移出布局，避免与标识重叠
+    at(2620, function () { if (line) line.style.visibility = 'hidden'; });
+
     // 2) logo 出现
     at(2400, function () {
       lockup.classList.add('is-on');
