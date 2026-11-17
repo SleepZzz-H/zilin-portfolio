@@ -12,59 +12,111 @@
     set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   };
 
-  /* ---------- 启动屏 ---------- */
+  /* ---------- 启动屏：文字 → logo → 左移闪烁 → 信息 ---------- */
   (function boot() {
     var el = document.getElementById('boot');
     if (!el) return;
     var bar = el.querySelector('.boot-track i');
     var pct = el.querySelector('.boot-s b');
     var txt = el.querySelector('[data-boot]');
-    var msgs = [
-      'READING OPERATOR ID',
-      'DECODING ZILIN HUANG',
-      'MAPPING ARCHIVE INDEX',
-      'CALIBRATING SIGNAL CORE',
-      'ASSEMBLING VISUAL FIELD',
-      'READY / LINDEN'
-    ];
+    var line = document.getElementById('introLine');
+    var textEl = document.getElementById('introText');
+    var lockup = document.getElementById('introLockup');
+    var info = document.getElementById('introInfo');
+    var enter = document.getElementById('introEnter');
+    var phrase = '在技术与艺术的交界处，建造可以被体验的秩序。';
+    var timers = [];
+    var typer = null;
     var finished = false;
 
+    function setProgress(v, label) {
+      if (bar) bar.style.width = v + '%';
+      if (pct) pct.textContent = String(Math.round(v)).padStart(3, '0') + '%';
+      if (txt && label) txt.textContent = label;
+    }
     function done() {
       if (finished) return;
       finished = true;
       el.classList.add('is-done');
       d.classList.add('is-ready');
       el.setAttribute('aria-hidden', 'true');
-      setTimeout(function () { el.style.display = 'none'; }, 900);
+      setTimeout(function () { el.style.display = 'none'; }, 1100);
     }
+    function finish() {
+      timers.forEach(clearTimeout);
+      if (typer) clearInterval(typer);
+      done();
+    }
+
     if (reduce) {
-      bar.style.width = '100%'; pct.textContent = '100%'; txt.textContent = msgs[5];
-      setTimeout(done, 100);
+      if (textEl) textEl.textContent = phrase;
+      setProgress(100, 'READY / LINDEN');
+      setTimeout(done, 300);
       return;
     }
-    var DURATION = 4200;
-    var startAt = performance.now();
-    var timer = setInterval(function () {
-      var p = Math.min(100, ((performance.now() - startAt) / DURATION) * 100);
-      bar.style.width = p + '%';
-      pct.textContent = String(Math.floor(p)).padStart(3, '0') + '%';
-      txt.textContent = msgs[Math.min(msgs.length - 1, Math.floor(p / 17))];
-      if (p >= 100) { clearInterval(timer); setTimeout(done, 480); }
-    }, 50);
-    // 点击或按键可以跳过开场
+
+    function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+
+    // 1) 逐字出现
+    var i = 0;
+    typer = setInterval(function () {
+      if (i < phrase.length) {
+        textEl.textContent += phrase.charAt(i++);
+      } else {
+        clearInterval(typer);
+        typer = null;
+      }
+    }, 55);
+
+    at(1950, function () {
+      if (typer) { clearInterval(typer); typer = null; }
+      textEl.textContent = phrase;
+      line.classList.add('is-out');
+      setProgress(28, 'PHRASE LOCKED');
+    });
+
+    // 2) logo 出现
+    at(2400, function () {
+      lockup.classList.add('is-on');
+      setProgress(44, 'SIGNATURE ACQUIRED');
+    });
+
+    // 3) logo 闪烁
+    at(3200, function () {
+      lockup.classList.add('is-blink');
+      setProgress(60, 'IDENTITY VERIFIED');
+    });
+
+    // 4) logo 左移，信息出现
+    at(3660, function () {
+      lockup.classList.add('is-shift');
+      info.classList.add('is-on');
+      setProgress(76, 'OPERATOR PROFILE');
+    });
+
+    at(4420, function () {
+      enter.classList.add('is-on');
+      setProgress(96, 'READY / LINDEN');
+    });
+    at(4800, function () { setProgress(100, 'READY / LINDEN'); });
+
+    // 自动进入（用户没操作时）
+    at(10000, finish);
+
+    enter.addEventListener('click', finish);
+
     function skip() {
-      clearInterval(timer);
-      setTimeout(done, 60);
+      finish();
       document.removeEventListener('pointerdown', skip);
       document.removeEventListener('keydown', skip);
     }
     setTimeout(function () {
       document.addEventListener('pointerdown', skip);
       document.addEventListener('keydown', skip);
-    }, 600);
+    }, 1000);
   })();
   // 兜底：即便启动屏被跳过，首屏也要落位
-  setTimeout(function () { d.classList.add('is-ready'); }, 5200);
+  setTimeout(function () { d.classList.add('is-ready'); }, 10000);
 
   /* ---------- 顶栏时钟 ---------- */
   (function clock() {

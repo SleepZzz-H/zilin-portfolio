@@ -8,8 +8,8 @@
 <meta name="theme-color" content="#15160f" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 21 7v10l-9 5-9-5V7z' fill='none' stroke='%23e2f21a' stroke-width='1.6'/%3E%3Cpath d='M12 7.4 16.4 12 12 16.6 7.6 12z' fill='%23e2f21a'/%3E%3C/svg%3E" />
 <link rel="preload" href="assets/works/portrait.jpg" as="image" />
-<link rel="stylesheet" href="css/theme.css?v=9" />
-<link rel="stylesheet" href="css/style.css?v=9" />
+<link rel="stylesheet" href="css/theme.css?v=10" />
+<link rel="stylesheet" href="css/style.css?v=10" />
 <script type="importmap">
 {
   "imports": {
@@ -26,7 +26,7 @@ try {
   var s = localStorage.getItem('efl-signal');
   if (s) document.documentElement.dataset.signal = s;
 } catch (e) {}
-setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 5200);
+setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 10000);
 </script>
 <noscript><style>.boot{display:none}.reveal{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>
 </head>
@@ -37,14 +37,22 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
   <div class="boot-grid" aria-hidden="true"></div>
   <div class="boot-scan" aria-hidden="true"></div>
   <div class="boot-head"><span>HIFA / ART × TECHNOLOGY</span><span>ID 2024001113</span></div>
-  <div class="boot-core">
-    <p class="boot-kicker">OPERATOR ARCHIVE — 档案加载中</p>
-    <h2 class="boot-name">
-      <span class="boot-l1" data-scramble>HUANG</span>
-      <span class="boot-l2" data-scramble>ZILIN</span>
-      <em class="boot-alias">LINDEN HUANG</em>
-    </h2>
-    <p class="boot-pinyin">黄 子 林 <i>/</i> HUANG ZILIN</p>
+  <div class="boot-core intro" id="intro">
+    <p class="intro-line" id="introLine"><span id="introText"></span><i class="intro-caret" aria-hidden="true"></i></p>
+
+    <div class="intro-lockup" id="introLockup">
+      <svg class="intro-logo" id="introLogo" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2 21 7v10l-9 5-9-5V7z" fill="none" stroke="currentColor" stroke-width="1"/>
+        <path d="M12 7.4 16.4 12 12 16.6 7.6 12z" fill="currentColor"/>
+      </svg>
+      <div class="intro-info" id="introInfo">
+        <b>黄子林 <i>/</i> HUANG ZILIN</b>
+        <span>湖北美术学院 · 艺术与科技 · 2024 级</span>
+        <em>11 WORKS · 09 COURSES · ALIAS LINDEN</em>
+      </div>
+    </div>
+
+    <button class="intro-enter" id="introEnter" type="button">进入档案 / ENTER <i>↗</i></button>
   </div>
   <div class="boot-foot">
     <div class="boot-track"><i></i></div>
@@ -517,11 +525,12 @@ setTimeout(function () { document.documentElement.classList.add('is-ready'); }, 
   <span class="lb-cap" id="lbCap"></span>
 </div>
 
-<script src="js/data.js?v=9"></script>
-<script src="js/main.js?v=9"></script>
-<script type="module" src="js/orbit3d.js?v=9"></script>
+<script src="js/data.js?v=10"></script>
+<script src="js/main.js?v=10"></script>
+<script type="module" src="js/orbit3d.js?v=10"></script>
 </body>
 </html>
+
 
 
 

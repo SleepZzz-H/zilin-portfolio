@@ -37,6 +37,98 @@
   animation: skipPulse 2.2s ease-in-out infinite;
 }
 @keyframes skipPulse { 50% { opacity: .3; } }
+
+/* ---------- 开场四段式：文字 → logo → 左移闪烁 → 信息 ---------- */
+.intro-line {
+  min-height: 2.4em;
+  margin: 0;
+  font-size: clamp(18px, 2.5vw, 30px);
+  font-weight: 500;
+  letter-spacing: .08em;
+  line-height: 1.6;
+  color: #f1f0ea;
+}
+.intro-caret {
+  display: inline-block;
+  width: 2px; height: 1.05em;
+  margin-left: 5px;
+  vertical-align: -.15em;
+  background: var(--signal);
+  animation: caretBlink .9s steps(2) infinite;
+}
+@keyframes caretBlink { 50% { opacity: 0; } }
+.intro-line.is-out {
+  animation: introLineOut .55s var(--ease) forwards;
+}
+@keyframes introLineOut {
+  to { opacity: 0; transform: translateY(-18px); filter: blur(7px); }
+}
+
+.intro-lockup {
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(18px, 3vw, 34px);
+  margin-top: clamp(6px, 1.4vw, 18px);
+  opacity: 0; transform: translateY(20px) scale(.92);
+  transition: opacity .8s var(--ease), transform .8s var(--ease);
+}
+.intro-lockup.is-on { opacity: 1; transform: none; }
+.intro-lockup.is-shift { transform: translateX(-6vw); }
+.intro-logo {
+  width: clamp(54px, 7vw, 92px);
+  height: auto;
+  color: var(--signal);
+  flex: 0 0 auto;
+  filter: drop-shadow(0 0 26px color-mix(in srgb, var(--signal) 55%, transparent));
+}
+.intro-lockup.is-blink .intro-logo { animation: logoBlink .2s steps(1) 4; }
+@keyframes logoBlink { 50% { opacity: .08; } }
+
+.intro-info {
+  text-align: left;
+  opacity: 0;
+  transform: translateX(-22px);
+  transition: opacity .7s var(--ease), transform .7s var(--ease);
+}
+.intro-info.is-on { opacity: 1; transform: none; }
+.intro-info b {
+  display: block;
+  font-size: clamp(16px, 2.1vw, 26px);
+  letter-spacing: .04em;
+  color: #f1f0ea;
+}
+.intro-info b i { font-style: normal; color: var(--signal); margin: 0 6px; }
+.intro-info span {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em;
+  color: #b9bbaf;
+}
+.intro-info em {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--font-mono); font-style: normal; font-size: 9px; letter-spacing: .2em;
+  color: var(--signal);
+}
+.intro-enter {
+  margin-top: clamp(20px, 3vw, 34px);
+  padding: 10px 18px;
+  border: 1px solid color-mix(in srgb, var(--signal) 60%, transparent);
+  background: transparent;
+  color: var(--signal);
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em;
+  cursor: pointer;
+  opacity: 0; transform: translateY(12px); pointer-events: none;
+  transition: opacity .6s var(--ease), transform .6s var(--ease), background .25s, color .25s;
+}
+.intro-enter.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.intro-enter:hover { background: var(--signal); color: var(--on-signal); }
+.intro-enter i { font-style: normal; margin-left: 6px; }
+@media (max-width: 719px) {
+  .intro-lockup { flex-direction: column; gap: 14px; }
+  .intro-lockup.is-shift { transform: translateX(-4vw); }
+  .intro-info { text-align: center; }
+  .intro-info span, .intro-info em { font-size: 8.5px; }
+}
 @media (max-width: 719px) {
   .boot-skip { right: 16px; bottom: 96px; font-size: 8px; }
 }
